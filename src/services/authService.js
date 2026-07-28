@@ -18,6 +18,11 @@ function normalizeAuthResponse(payload) {
   };
 }
 
+function normalizeUserResponse(payload) {
+  const data = payload?.data ?? payload;
+  return data ? { ...data, name: data.full_name || data.name || data.email } : null;
+}
+
 /**
  * Login with email + password.
  * Returns { user, token }

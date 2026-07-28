@@ -29,10 +29,15 @@ import { useToast } from '@/context/ToastContext';
 // Pure-CSS bar chart
 function BarChart({ data }) {
   const safeData = Array.isArray(data) ? data : [];
-  const max = safeData.length ? Math.max(...safeData.map((d) => d.conversations || 0)) : 1;
+  const chartData = safeData.map((d) => ({
+    day: d.date ? d.date.slice(5) : d.day || '—',
+    resolved: d.tickets || d.resolved || 0,
+    conversations: d.conversations || 0,
+  }));
+  const max = chartData.length ? Math.max(...chartData.map((d) => d.conversations || 0)) : 1;
   return (
     <div className="flex items-end justify-between gap-2 h-40 px-2">
-      {safeData.map((d) => (
+      {chartData.map((d) => (
         <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
           <div className="relative w-full flex items-end justify-center" style={{ height: '120px' }}>
             {/* Resolved bar (behind) */}

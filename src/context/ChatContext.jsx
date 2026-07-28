@@ -41,6 +41,9 @@ function chatReducer(state, action) {
     case 'CLEAR':
       return { ...initialState, conversationId: generateId() };
 
+    case 'SET_CONVERSATION_ID':
+      return { ...state, conversationId: action.payload };
+
     case 'UPDATE_MESSAGE_STATUS':
       return {
         ...state,
@@ -89,6 +92,10 @@ export function ChatProvider({ children }) {
       }
 
       const payload = response?.data ?? response;
+      const conversationId = payload?.conversation_id || payload?.ai_response?.conversation_id;
+      if (conversationId) {
+        dispatch({ type: 'SET_CONVERSATION_ID', payload: conversationId });
+      }
       const aiMessage = {
         id: generateId(),
         role: 'assistant',

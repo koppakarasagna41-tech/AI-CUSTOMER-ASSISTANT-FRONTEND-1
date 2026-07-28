@@ -13,8 +13,8 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '@/utils/constants';
 
-const envBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-const baseURL = envBaseUrl.replace(/\/api\/?$/, '/api/v1');
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').trim();
+const baseURL = envBaseUrl.endsWith('/api/v1') ? envBaseUrl : envBaseUrl.replace(/\/api\/?$/, '/api/v1');
 
 const api = axios.create({
   baseURL,
