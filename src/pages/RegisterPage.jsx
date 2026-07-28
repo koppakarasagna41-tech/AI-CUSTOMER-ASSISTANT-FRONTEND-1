@@ -13,25 +13,25 @@ import {
   HiUser, HiEnvelope, HiLockClosed, HiEye, HiEyeSlash, HiCheckCircle,
 } from 'react-icons/hi2';
 
-import { useAuth }    from '@/context/AuthContext';
-import { useToast }   from '@/context/ToastContext';
-import authService    from '@/services/authService';
-import Input          from '@/components/ui/Input';
-import Button         from '@/components/ui/Button';
-import { ROUTES }     from '@/utils/constants';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import authService from '@/services/authService';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { ROUTES } from '@/utils/constants';
 import { isValidEmail, isStrongPassword } from '@/utils/helpers';
 
 // Simple strength meter
 function PasswordStrength({ password }) {
   if (!password) return null;
   const checks = [
-    { label: '8+ characters',      ok: password.length >= 8        },
-    { label: 'Uppercase letter',   ok: /[A-Z]/.test(password)      },
-    { label: 'Lowercase letter',   ok: /[a-z]/.test(password)      },
-    { label: 'Number',             ok: /\d/.test(password)         },
+    { label: '8+ characters', ok: password.length >= 8 },
+    { label: 'Uppercase letter', ok: /[A-Z]/.test(password) },
+    { label: 'Lowercase letter', ok: /[a-z]/.test(password) },
+    { label: 'Number', ok: /\d/.test(password) },
   ];
   const score = checks.filter((c) => c.ok).length;
-  const bar   = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+  const bar = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
 
   return (
     <div className="mt-2 space-y-1.5">
@@ -47,7 +47,7 @@ function PasswordStrength({ password }) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
         {checks.map(({ label, ok }) => (
           <span key={label}
-                className={`text-[11px] flex items-center gap-1
+            className={`text-[11px] flex items-center gap-1
                            ${ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}>
             <HiCheckCircle className={`w-3 h-3 ${ok ? '' : 'opacity-30'}`} />
             {label}
@@ -59,9 +59,9 @@ function PasswordStrength({ password }) {
 }
 
 export default function RegisterPage() {
-  const { login }    = useAuth();
-  const { toast }    = useToast();
-  const navigate     = useNavigate();
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
@@ -78,14 +78,14 @@ export default function RegisterPage() {
 
   function validate() {
     const e = {};
-    if (!form.name.trim())            e.name    = 'Full name is required.';
-    if (!form.email)                  e.email   = 'Email is required.';
+    if (!form.name.trim()) e.name = 'Full name is required.';
+    if (!form.email) e.email = 'Email is required.';
     else if (!isValidEmail(form.email)) e.email = 'Enter a valid email.';
-    if (!form.password)               e.password = 'Password is required.';
+    if (!form.password) e.password = 'Password is required.';
     else if (!isStrongPassword(form.password))
-                                      e.password = 'Password is too weak.';
+      e.password = 'Password is too weak.';
     if (form.password !== form.confirm) e.confirm = 'Passwords do not match.';
-    if (!agreed)                      e.terms   = 'You must accept the terms.';
+    if (!agreed) e.terms = 'You must accept the terms.';
     return e;
   }
 
@@ -96,10 +96,10 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const { user, token } = await authService.register({
+      const { user, token, refreshToken } = await authService.register({
         name: form.name.trim(), email: form.email, password: form.password,
       });
-      login(user, token);
+      login(user, token, refreshToken);
       toast.success('Account created! Welcome aboard.');
       navigate(ROUTES.HOME, { replace: true });
     } catch (err) {
@@ -116,7 +116,7 @@ export default function RegisterPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Already have one?{' '}
           <Link to={ROUTES.LOGIN}
-                className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
+            className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
             Sign in
           </Link>
         </p>
@@ -154,8 +154,8 @@ export default function RegisterPage() {
             leftIcon={<HiLockClosed className="w-4 h-4" />}
             rightIcon={
               <button type="button" onClick={() => setShowPw((p) => !p)}
-                      aria-label={showPw ? 'Hide password' : 'Show password'}
-                      className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                aria-label={showPw ? 'Hide password' : 'Show password'}
+                className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                 {showPw ? <HiEyeSlash className="w-4 h-4" /> : <HiEye className="w-4 h-4" />}
               </button>
             }

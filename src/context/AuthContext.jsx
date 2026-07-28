@@ -11,13 +11,15 @@
  */
 
 import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { STORAGE_KEYS } from '@/utils/constants';
+import authService from '@/services/authService';
 
 // ── Initial state ────────────────────────────────────────────
 const initialState = {
-  user:          null,   // { id, name, email, avatar, role }
-  token:         null,   // JWT string
+  user: null,   // { id, name, email, avatar, role }
+  token: null,   // JWT string
   isAuthenticated: false,
-  isLoading:     true,   // true while hydrating from localStorage
+  isLoading: true,   // true while hydrating from localStorage
 };
 
 // ── Reducer ──────────────────────────────────────────────────
@@ -26,19 +28,19 @@ function authReducer(state, action) {
     case 'HYDRATE':
       return {
         ...state,
-        user:            action.payload.user,
-        token:           action.payload.token,
+        user: action.payload.user,
+        token: action.payload.token,
         isAuthenticated: !!action.payload.token,
-        isLoading:       false,
+        isLoading: false,
       };
 
     case 'LOGIN':
       return {
         ...state,
-        user:            action.payload.user,
-        token:           action.payload.token,
+        user: action.payload.user,
+        token: action.payload.token,
         isAuthenticated: true,
-        isLoading:       false,
+        isLoading: false,
       };
 
     case 'LOGOUT':
@@ -68,8 +70,8 @@ export function AuthProvider({ children }) {
   // Hydrate auth state from localStorage on mount
   useEffect(() => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const user  = JSON.parse(localStorage.getItem('auth_user') || 'null');
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH_USER) || 'null');
       dispatch({ type: 'HYDRATE', payload: { token, user } });
     } catch {
       dispatch({ type: 'HYDRATE', payload: { token: null, user: null } });
@@ -82,19 +84,29 @@ export function AuthProvider({ children }) {
    * Call after a successful API login response.
    * Persists token + user to localStorage.
    */
-  const login = useCallback((user, token) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user',  JSON.stringify(user));
+  const login = useCallback((user, token, refreshToken = null) => {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    if (refreshToken) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, refreshToken);
+    }
+    localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(user));
     dispatch({ type: 'LOGIN', payload: { user, token } });
   }, []);
 
   /**
    * Clears all auth state and localStorage.
    */
-  const logout = useCallback(() => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    dispatch({ type: 'LOGOUT' });
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Ignore backend errors and clear the client session
+    } finally {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+      dispatch({ type: 'LOGOUT' });
+    }
   }, []);
 
   /**
@@ -102,7 +114,7 @@ export function AuthProvider({ children }) {
    */
   const updateUser = useCallback((patch) => {
     const updated = { ...state.user, ...patch };
-    localStorage.setItem('auth_user', JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updated));
     dispatch({ type: 'UPDATE_USER', payload: patch });
   }, [state.user]);
 

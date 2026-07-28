@@ -4,36 +4,31 @@
  * API calls for analytics data.
  */
 
-import {
-  PLACEHOLDER_METRICS,
-  PLACEHOLDER_CHART_DATA,
-  PLACEHOLDER_TOP_ISSUES,
-} from '@/utils/placeholderData';
-
-function delay(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+import api from './api';
 
 /** Overview KPI metrics. */
-export async function getMetrics(_period = '7d') {
-  await delay(500);
-  return PLACEHOLDER_METRICS;
-  // return api.get('/analytics/metrics', { params: { period } });
+export async function getMetrics(period = 'last_30_days') {
+  const response = await api.get('/analytics/overview', { params: { period } });
+  return response?.data ?? response;
+}
+
+/** Full dashboard payload. */
+export async function getDashboard(period = 'last_30_days') {
+  const response = await api.get('/analytics/dashboard', { params: { period } });
+  return response?.data ?? response;
 }
 
 /** Conversations chart data for the given period. */
-export async function getChartData(_period = '7d') {
-  await delay(600);
-  return PLACEHOLDER_CHART_DATA;
-  // return api.get('/analytics/chart', { params: { period } });
+export async function getChartData(period = 'last_30_days') {
+  const response = await api.get('/analytics/charts/daily', { params: { days: 30 } });
+  return response?.data ?? response;
 }
 
 /** Top issue categories. */
-export async function getTopIssues(_period = '7d') {
-  await delay(400);
-  return PLACEHOLDER_TOP_ISSUES;
-  // return api.get('/analytics/top-issues', { params: { period } });
+export async function getTopIssues(period = 'last_30_days') {
+  const response = await api.get('/analytics/charts/intents', { params: { period } });
+  return response?.data ?? response;
 }
 
-const analyticsService = { getMetrics, getChartData, getTopIssues };
+const analyticsService = { getMetrics, getDashboard, getChartData, getTopIssues };
 export default analyticsService;

@@ -5,36 +5,32 @@
  */
 
 import api from './api';
-
-function delay(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+import { STORAGE_KEYS } from '@/utils/constants';
 
 /** Fetch the current user's profile. */
 export async function getProfile() {
-  await delay(300);
-  return JSON.parse(localStorage.getItem('auth_user') || 'null');
-  // return api.get('/users/me');
+  const response = await api.get('/auth/me');
+  const user = response?.data ?? response;
+  return user ? { ...user, name: user.full_name || user.name || user.email } : null;
 }
 
 /** Update profile fields (name, avatar, etc.). */
 export async function updateProfile(data) {
-  await delay(600);
-  const current = JSON.parse(localStorage.getItem('auth_user') || '{}');
-  const updated = { ...current, ...data };
-  localStorage.setItem('auth_user', JSON.stringify(updated));
-  return updated;
-  // return api.patch('/users/me', data);
+  const payload = {
+    full_name: data.name ?? data.full_name,
+    email: data.email,
+  };
+  const response = await api.patch('/auth/me', payload);
+  const user = response?.data ?? response;
+  return user ? { ...user, name: user.full_name || user.name || user.email } : null;
 }
 
 /** Change password. */
 export async function changePassword({ currentPassword, newPassword }) {
-  await delay(700);
   if (!currentPassword || !newPassword) {
     throw { status: 400, message: 'Both fields are required.' };
   }
-  return { success: true };
-  // return api.post('/users/me/change-password', { currentPassword, newPassword });
+  return api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword });
 }
 
 const userService = { getProfile, updateProfile, changePassword };

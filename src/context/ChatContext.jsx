@@ -20,27 +20,13 @@ import {
   useRef,
 } from 'react';
 import { generateId } from '@/utils/helpers';
-
-// ── Placeholder AI responses ─────────────────────────────────
-const AI_RESPONSES = [
-  "Thanks for reaching out! I'd be happy to help you with that. Could you provide a bit more detail so I can assist you better?",
-  "Great question! Based on what you've shared, here's what I recommend: make sure to check your account settings first, then try refreshing the page.",
-  "I understand your concern. This is a common issue that our team is aware of. Here are the steps to resolve it: 1) Clear your cache, 2) Log out and back in, 3) Contact support if the issue persists.",
-  "I've looked into this for you. It seems like everything is working on our end. Could you try from a different browser or device?",
-  "Absolutely! Our premium plan includes unlimited access, priority support, and advanced analytics. Would you like me to walk you through the upgrade process?",
-  "I'm sorry to hear you're experiencing this issue. Let me escalate this to our technical team. In the meantime, here's a workaround that might help…",
-  "That's a great point! We actually released an update last week that addresses exactly this. Make sure you're on the latest version.",
-];
-
-function getRandomAIResponse() {
-  return AI_RESPONSES[Math.floor(Math.random() * AI_RESPONSES.length)];
-}
+import chatService from '@/services/chatService';
 
 // ── State shape ──────────────────────────────────────────────
 const initialState = {
-  messages:        [],   // [{ id, role:'user'|'assistant', content, timestamp, status }]
-  isTyping:        false,
-  conversationId:  generateId(),
+  messages: [],   // [{ id, role:'user'|'assistant', content, timestamp, status }]
+  isTyping: false,
+  conversationId: generateId(),
 };
 
 // ── Reducer ──────────────────────────────────────────────────
@@ -83,32 +69,47 @@ export function ChatProvider({ children }) {
   const sendMessage = useCallback(async (content) => {
     if (!content.trim()) return;
 
-    // 1. Add user message immediately
+    const cleanedContent = content.trim();
     const userMessage = {
-      id:        generateId(),
-      role:      'user',
-      content:   content.trim(),
+      id: generateId(),
+      role: 'user',
+      content: cleanedContent,
       timestamp: new Date().toISOString(),
-      status:    'sent',
+      status: 'sent',
     };
     dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-
-    // 2. Show typing indicator
     dispatch({ type: 'SET_TYPING', payload: true });
 
-    // 3. Simulate AI response delay (replace with real API call)
-    typingTimeout.current = setTimeout(() => {
+    try {
+      let response;
+      if (state.conversationId && state.conversationId.startsWith('conv_')) {
+        response = await chatService.sendMessage({ conversationId: state.conversationId, content: cleanedContent });
+      } else {
+        response = await chatService.startChat({ message: cleanedContent, title: cleanedContent.slice(0, 60) });
+      }
+
+      const payload = response?.data ?? response;
       const aiMessage = {
-        id:        generateId(),
-        role:      'assistant',
-        content:   getRandomAIResponse(),
-        timestamp: new Date().toISOString(),
-        status:    'delivered',
+        id: generateId(),
+        role: 'assistant',
+        content: payload?.ai_response?.content || payload?.message || 'I could not respond right now.',
+        timestamp: payload?.ai_response?.created_at || new Date().toISOString(),
+        status: 'delivered',
       };
-      dispatch({ type: 'SET_TYPING',    payload: false });
-      dispatch({ type: 'ADD_MESSAGE',   payload: aiMessage });
-    }, 1200 + Math.random() * 800);
-  }, []);
+      dispatch({ type: 'SET_TYPING', payload: false });
+      dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
+    } catch (error) {
+      dispatch({ type: 'SET_TYPING', payload: false });
+      const aiMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: error?.message || 'The assistant could not respond right now.',
+        timestamp: new Date().toISOString(),
+        status: 'error',
+      };
+      dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
+    }
+  }, [state.conversationId]);
 
   const clearConversation = useCallback(() => {
     if (typingTimeout.current) clearTimeout(typingTimeout.current);

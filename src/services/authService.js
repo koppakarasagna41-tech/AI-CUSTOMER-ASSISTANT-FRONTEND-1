@@ -2,31 +2,34 @@
  * authService.js
  *
  * All authentication-related API calls.
- * Currently returns mock data — swap the mock blocks with
- * real `api.post(...)` calls when the backend is ready.
  */
 
 import api from './api';
-import { DEMO_USER, DEMO_CREDENTIALS } from '@/utils/placeholderData';
+import { STORAGE_KEYS } from '@/utils/constants';
+
+function normalizeAuthResponse(payload) {
+  const data = payload?.data ?? payload;
+  const user = data?.user ?? null;
+  const tokens = data?.tokens ?? null;
+  return {
+    user: user ? { ...user, name: user.full_name || user.name || user.email } : null,
+    token: tokens?.access_token ?? null,
+    refreshToken: tokens?.refresh_token ?? null,
+  };
+}
 
 /**
  * Login with email + password.
  * Returns { user, token }
  */
 export async function login({ email, password }) {
-  // ── MOCK — remove when backend is live ──
-  await delay(800);
-  if (
-    email === DEMO_CREDENTIALS.email &&
-    password === DEMO_CREDENTIALS.password
-  ) {
-    return { user: DEMO_USER, token: 'mock_jwt_token_' + Date.now() };
+  const response = await api.post('/auth/login', { email, password });
+  const normalized = normalizeAuthResponse(response);
+  if (normalized.token) {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, normalized.token);
+    localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, normalized.refreshToken);
   }
-  throw { status: 401, message: 'Invalid email or password.' };
-  // ── END MOCK ──
-
-  // Real call (uncomment when backend is ready):
-  // return api.post('/auth/login', { email, password });
+  return normalized;
 }
 
 /**
@@ -34,42 +37,34 @@ export async function login({ email, password }) {
  * Returns { user, token }
  */
 export async function register({ name, email, password }) {
-  // ── MOCK ──
-  await delay(1000);
-  const newUser = { ...DEMO_USER, id: 'usr_' + Date.now(), name, email };
-  return { user: newUser, token: 'mock_jwt_token_' + Date.now() };
-  // ── END MOCK ──
-
-  // return api.post('/auth/register', { name, email, password });
+  const response = await api.post('/auth/register', { full_name: name, email, password });
+  const normalized = normalizeAuthResponse(response);
+  if (normalized.token) {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, normalized.token);
+    localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, normalized.refreshToken);
+  }
+  return normalized;
 }
 
 /**
  * Logout — invalidates the server-side token.
  */
 export async function logout() {
-  // ── MOCK ──
-  await delay(200);
+  try {
+    await api.post('/auth/logout');
+  } finally {
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+  }
   return { success: true };
-  // ── END MOCK ──
-
-  // return api.post('/auth/logout');
 }
 
 /**
  * Request a password-reset email.
  */
 export async function forgotPassword({ email }) {
-  // ── MOCK ──
-  await delay(600);
-  return { message: `Reset link sent to ${email}` };
-  // ── END MOCK ──
-
-  // return api.post('/auth/forgot-password', { email });
-}
-
-// ── Helper ───────────────────────────────────────────────────
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return api.post('/auth/forgot-password', { email });
 }
 
 const authService = { login, register, logout, forgotPassword };

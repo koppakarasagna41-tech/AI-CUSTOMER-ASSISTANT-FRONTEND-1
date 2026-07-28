@@ -9,8 +9,8 @@
  *  - Satisfaction score ring
  */
 
-import { useState } from 'react';
-import { motion }   from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   HiChatBubbleLeftRight,
   HiCheckCircle,
@@ -20,52 +20,19 @@ import {
   HiUsers,
 } from 'react-icons/hi2';
 
-import StatCard  from '@/components/ui/StatCard';
-import {
-  PLACEHOLDER_METRICS,
-  PLACEHOLDER_CHART_DATA,
-  PLACEHOLDER_TOP_ISSUES,
-} from '@/utils/placeholderData';
+import StatCard from '@/components/ui/StatCard';
 import { ANALYTICS_PERIODS } from '@/utils/constants';
 import { formatCount as fmtCount } from '@/utils/helpers';
-
-const KPI_CARDS = [
-  {
-    title: 'Total Conversations',
-    value: fmtCount(PLACEHOLDER_METRICS.totalConversations),
-    icon:  <HiChatBubbleLeftRight className="w-5 h-5" />,
-    color: 'blue',
-    trend: { value: 12, isPositive: true },
-  },
-  {
-    title: 'Resolved Today',
-    value: String(PLACEHOLDER_METRICS.resolvedToday),
-    icon:  <HiCheckCircle className="w-5 h-5" />,
-    color: 'green',
-    trend: { value: 8, isPositive: true },
-  },
-  {
-    title: 'Avg Response Time',
-    value: PLACEHOLDER_METRICS.avgResponseTime,
-    icon:  <HiClock className="w-5 h-5" />,
-    color: 'purple',
-    trend: { value: 5, isPositive: true },
-  },
-  {
-    title: 'Active Users',
-    value: String(PLACEHOLDER_METRICS.activeUsers),
-    icon:  <HiUsers className="w-5 h-5" />,
-    color: 'yellow',
-    trend: { value: 3, isPositive: false },
-  },
-];
+import analyticsService from '@/services/analyticsService';
+import { useToast } from '@/context/ToastContext';
 
 // Pure-CSS bar chart
 function BarChart({ data }) {
-  const max = Math.max(...data.map((d) => d.conversations));
+  const safeData = Array.isArray(data) ? data : [];
+  const max = safeData.length ? Math.max(...safeData.map((d) => d.conversations || 0)) : 1;
   return (
     <div className="flex items-end justify-between gap-2 h-40 px-2">
-      {data.map((d) => (
+      {safeData.map((d) => (
         <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
           <div className="relative w-full flex items-end justify-center" style={{ height: '120px' }}>
             {/* Resolved bar (behind) */}
@@ -94,16 +61,16 @@ function BarChart({ data }) {
 
 // Satisfaction score ring (pure SVG)
 function SatisfactionRing({ score }) {
-  const r         = 40;
-  const circ      = 2 * Math.PI * r;
-  const offset    = circ - (score / 100) * circ;
+  const r = 40;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative w-28 h-28">
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
           <circle cx="50" cy="50" r={r} fill="none"
-                  strokeWidth="10" className="stroke-gray-200 dark:stroke-gray-700" />
+            strokeWidth="10" className="stroke-gray-200 dark:stroke-gray-700" />
           <motion.circle
             cx="50" cy="50" r={r}
             fill="none" strokeWidth="10"
@@ -128,7 +95,67 @@ function SatisfactionRing({ score }) {
 }
 
 export default function AnalyticsPage() {
-  const [period, setPeriod] = useState('7d');
+  const { toast } = useToast();
+  const [period, setPeriod] = useState('last_30_days');
+  const [metrics, setMetrics] = useState(null);
+  const [dailyChart, setDailyChart] = useState([]);
+  const [topIssues, setTopIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      try {
+        const [overviewResponse, chartResponse, issuesResponse] = await Promise.all([
+          analyticsService.getMetrics(period),
+          analyticsService.getChartData(period),
+          analyticsService.getTopIssues(period),
+        ]);
+        const overview = overviewResponse?.data ?? overviewResponse;
+        const chart = chartResponse?.data ?? chartResponse;
+        const issues = issuesResponse?.data ?? issuesResponse;
+        setMetrics(overview);
+        setDailyChart(chart?.data ?? []);
+        setTopIssues(issues?.data ?? []);
+      } catch (err) {
+        toast.error(err.message || 'Unable to load analytics.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAnalytics();
+  }, [period, toast]);
+
+  const KPI_CARDS = useMemo(() => [
+    {
+      title: 'Total Conversations',
+      value: fmtCount(metrics?.total_conversations?.value ?? 0),
+      icon: <HiChatBubbleLeftRight className="w-5 h-5" />,
+      color: 'blue',
+      trend: { value: 12, isPositive: true },
+    },
+    {
+      title: 'Resolved Today',
+      value: String(metrics?.resolved_tickets?.value ?? 0),
+      icon: <HiCheckCircle className="w-5 h-5" />,
+      color: 'green',
+      trend: { value: 8, isPositive: true },
+    },
+    {
+      title: 'Avg Response Time',
+      value: metrics?.avg_response_time_ms?.value ? `${metrics.avg_response_time_ms.value} ms` : '—',
+      icon: <HiClock className="w-5 h-5" />,
+      color: 'purple',
+      trend: { value: 5, isPositive: true },
+    },
+    {
+      title: 'Active Users',
+      value: String(metrics?.total_users?.value ?? 0),
+      icon: <HiUsers className="w-5 h-5" />,
+      color: 'yellow',
+      trend: { value: 3, isPositive: false },
+    },
+  ], [metrics]);
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
@@ -136,7 +163,7 @@ export default function AnalyticsPage() {
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0  }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
@@ -161,18 +188,22 @@ export default function AnalyticsPage() {
       </motion.div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {KPI_CARDS.map((card, i) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0  }}
-            transition={{ duration: 0.3, delay: i * 0.07 }}
-          >
-            <StatCard {...card} />
-          </motion.div>
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-sm text-gray-500 dark:text-gray-400">Loading analytics…</div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {KPI_CARDS.map((card, i) => (
+            <motion.div
+              key={card.title}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.07 }}
+            >
+              <StatCard {...card} />
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-3 gap-4">
@@ -180,7 +211,7 @@ export default function AnalyticsPage() {
         {/* Bar chart */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0  }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.2 }}
           className="card p-5 lg:col-span-2"
         >
@@ -199,17 +230,17 @@ export default function AnalyticsPage() {
               </span>
             </div>
           </div>
-          <BarChart data={PLACEHOLDER_CHART_DATA} />
+          <BarChart data={dailyChart} />
         </motion.div>
 
         {/* Satisfaction ring + AI resolution */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0  }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.25 }}
           className="card p-5 flex flex-col gap-6"
         >
-          <SatisfactionRing score={PLACEHOLDER_METRICS.satisfactionScore} />
+          <SatisfactionRing score={Math.min(100, Math.round((metrics?.ai_resolution_rate?.value ?? 0) * 100))} />
 
           <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
             <div className="flex items-center justify-between mb-2">
@@ -220,13 +251,13 @@ export default function AnalyticsPage() {
                 </span>
               </div>
               <span className="text-sm font-bold text-gray-900 dark:text-white">
-                {PLACEHOLDER_METRICS.aiResolutionRate}%
+                {Math.round((metrics?.ai_resolution_rate?.value ?? 0) * 100)}%
               </span>
             </div>
             <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${PLACEHOLDER_METRICS.aiResolutionRate}%` }}
+                animate={{ width: `${Math.round((metrics?.ai_resolution_rate?.value ?? 0) * 100)}%` }}
                 transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
                 className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
               />
@@ -241,7 +272,7 @@ export default function AnalyticsPage() {
       {/* Top issues table */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0  }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.3 }}
         className="card overflow-hidden"
       >
@@ -251,20 +282,20 @@ export default function AnalyticsPage() {
           </h2>
         </div>
         <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-          {PLACEHOLDER_TOP_ISSUES.map(({ topic, count, pct }, i) => (
-            <div key={topic} className="flex items-center gap-4 px-5 py-3">
+          {topIssues.map(({ intent, count, percentage }, i) => (
+            <div key={intent} className="flex items-center gap-4 px-5 py-3">
               <span className="text-xs font-bold text-gray-400 w-4">{i + 1}</span>
-              <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{topic}</span>
+              <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{intent}</span>
               <div className="w-24 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${pct}%` }}
+                  animate={{ width: `${percentage}%` }}
                   transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 + i * 0.05 }}
                   className="h-full bg-primary-500 rounded-full"
                 />
               </div>
               <span className="text-xs text-gray-500 dark:text-gray-400 w-16 text-right">
-                {fmtCount(count)} ({pct}%)
+                {fmtCount(count)} ({percentage}%)
               </span>
             </div>
           ))}

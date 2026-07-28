@@ -5,6 +5,7 @@
  * Displays a welcome hero, quick-action cards, and a live activity feed.
  */
 
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -18,61 +19,90 @@ import {
   HiClock,
 } from 'react-icons/hi2';
 
-import { useAuth }   from '@/context/AuthContext';
-import { ROUTES }    from '@/utils/constants';
-import {
-  PLACEHOLDER_METRICS,
-  PLACEHOLDER_CONVERSATIONS,
-} from '@/utils/placeholderData';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { ROUTES } from '@/utils/constants';
 import { formatCount, timeAgo } from '@/utils/helpers';
 import Badge, { statusVariant } from '@/components/ui/Badge';
+import analyticsService from '@/services/analyticsService';
+import chatService from '@/services/chatService';
 
 // ── Animation helpers ─────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0  },
+  animate: { opacity: 1, y: 0 },
   transition: { duration: 0.4, delay, ease: 'easeOut' },
 });
 
 // ── Quick action cards ────────────────────────────────────────
 const QUICK_ACTIONS = [
   {
-    to:      ROUTES.CHAT,
-    label:   'Start AI Chat',
-    desc:    'Get instant answers from the AI assistant.',
-    icon:    HiChatBubbleLeftRight,
-    color:   'from-primary-500 to-primary-700',
-    shadow:  'shadow-glow',
+    to: ROUTES.CHAT,
+    label: 'Start AI Chat',
+    desc: 'Get instant answers from the AI assistant.',
+    icon: HiChatBubbleLeftRight,
+    color: 'from-primary-500 to-primary-700',
+    shadow: 'shadow-glow',
   },
   {
-    to:      ROUTES.HISTORY,
-    label:   'View History',
-    desc:    'Browse past conversations and resolutions.',
-    icon:    HiClipboardDocumentList,
-    color:   'from-purple-500 to-purple-700',
-    shadow:  '',
+    to: ROUTES.HISTORY,
+    label: 'View History',
+    desc: 'Browse past conversations and resolutions.',
+    icon: HiClipboardDocumentList,
+    color: 'from-purple-500 to-purple-700',
+    shadow: '',
   },
   {
-    to:      ROUTES.ANALYTICS,
-    label:   'Analytics',
-    desc:    'Track support metrics and AI performance.',
-    icon:    HiChartBarSquare,
-    color:   'from-emerald-500 to-emerald-700',
-    shadow:  '',
+    to: ROUTES.ANALYTICS,
+    label: 'Analytics',
+    desc: 'Track support metrics and AI performance.',
+    icon: HiChartBarSquare,
+    color: 'from-emerald-500 to-emerald-700',
+    shadow: '',
   },
-];
-
-// ── KPI mini stats ────────────────────────────────────────────
-const KPI = [
-  { label: 'Total Conversations', value: formatCount(PLACEHOLDER_METRICS.totalConversations), icon: HiChatBubbleLeftRight, color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-900/20'   },
-  { label: 'Resolved Today',      value: PLACEHOLDER_METRICS.resolvedToday,                   icon: HiCheckCircle,         color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
-  { label: 'Avg Response',        value: PLACEHOLDER_METRICS.avgResponseTime,                  icon: HiClock,               color: 'text-purple-600 dark:text-purple-400',bg: 'bg-purple-50 dark:bg-purple-900/20'},
-  { label: 'AI Resolution Rate',  value: `${PLACEHOLDER_METRICS.aiResolutionRate}%`,           icon: HiBoltSlash,           color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
 ];
 
 export default function HomePage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [metrics, setMetrics] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const firstName = user?.name?.split(' ')[0] ?? 'there';
+
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        const [overviewResponse, conversationResponse] = await Promise.all([
+          analyticsService.getMetrics('last_30_days'),
+          chatService.getConversations({ page_size: 4 }),
+        ]);
+        const overview = overviewResponse?.data ?? overviewResponse;
+        const items = (conversationResponse?.data ?? []).map((conversation) => ({
+          id: conversation.id || conversation.conversation_id,
+          title: conversation.title || 'Untitled conversation',
+          preview: conversation.title || 'No preview available',
+          status: conversation.status || 'open',
+          updatedAt: conversation.updated_at || conversation.created_at,
+        }));
+        setMetrics(overview);
+        setConversations(items);
+      } catch (error) {
+        toast.error(error.message || 'Unable to load dashboard data.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, [toast]);
+
+  const KPI = [
+    { label: 'Total Conversations', value: formatCount(metrics?.total_conversations?.value ?? 0), icon: HiChatBubbleLeftRight, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Resolved Today', value: metrics?.resolved_tickets?.value ?? 0, icon: HiCheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Avg Response', value: metrics?.avg_response_time_ms?.value ? `${metrics.avg_response_time_ms.value} ms` : '—', icon: HiClock, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: 'AI Resolution Rate', value: `${Math.round((metrics?.ai_resolution_rate?.value ?? 0) * 100)}%`, icon: HiBoltSlash, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  ];
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
@@ -159,14 +189,18 @@ export default function HomePage() {
             Recent Conversations
           </h2>
           <Link to={ROUTES.HISTORY}
-                className="text-xs text-primary-600 dark:text-primary-400
+            className="text-xs text-primary-600 dark:text-primary-400
                            hover:underline font-medium">
             View all
           </Link>
         </div>
 
         <div className="card divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden">
-          {PLACEHOLDER_CONVERSATIONS.slice(0, 4).map((conv) => (
+          {loading ? (
+            <div className="px-5 py-6 text-sm text-gray-500 dark:text-gray-400">Loading recent conversations…</div>
+          ) : conversations.length === 0 ? (
+            <div className="px-5 py-6 text-sm text-gray-500 dark:text-gray-400">No recent conversations yet.</div>
+          ) : conversations.map((conv) => (
             <Link
               key={conv.id}
               to={ROUTES.HISTORY}

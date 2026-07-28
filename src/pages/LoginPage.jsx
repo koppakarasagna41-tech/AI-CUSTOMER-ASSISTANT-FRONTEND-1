@@ -12,32 +12,32 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { HiEnvelope, HiLockClosed, HiEye, HiEyeSlash } from 'react-icons/hi2';
 
-import { useAuth }    from '@/context/AuthContext';
-import { useToast }   from '@/context/ToastContext';
-import authService    from '@/services/authService';
-import Input          from '@/components/ui/Input';
-import Button         from '@/components/ui/Button';
-import { ROUTES }     from '@/utils/constants';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import authService from '@/services/authService';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { ROUTES } from '@/utils/constants';
 import { isValidEmail } from '@/utils/helpers';
 import { DEMO_CREDENTIALS } from '@/utils/placeholderData';
 
 export default function LoginPage() {
-  const { login }    = useAuth();
-  const { toast }    = useToast();
-  const navigate     = useNavigate();
-  const location     = useLocation();
-  const from         = location.state?.from?.pathname || ROUTES.HOME;
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || ROUTES.HOME;
 
-  const [form, setForm]       = useState({ email: '', password: '' });
-  const [errors, setErrors]   = useState({});
-  const [showPw, setShowPw]   = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function validate() {
     const e = {};
-    if (!form.email)              e.email    = 'Email is required.';
+    if (!form.email) e.email = 'Email is required.';
     else if (!isValidEmail(form.email)) e.email = 'Enter a valid email.';
-    if (!form.password)           e.password = 'Password is required.';
+    if (!form.password) e.password = 'Password is required.';
     return e;
   }
 
@@ -48,9 +48,9 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const { user, token } = await authService.login(form);
-      login(user, token);
-      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
+      const { user, token, refreshToken } = await authService.login(form);
+      login(user, token, refreshToken);
+      toast.success(`Welcome back, ${user?.name?.split(' ')[0] || 'there'}!`);
       navigate(from, { replace: true });
     } catch (err) {
       toast.error(err.message || 'Login failed. Please try again.');
@@ -72,7 +72,7 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Don't have an account?{' '}
           <Link to={ROUTES.REGISTER}
-                className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
+            className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
             Create one free
           </Link>
         </p>
@@ -136,7 +136,7 @@ export default function LoginPage() {
             <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
           </label>
           <button type="button"
-                  className="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
+            className="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">
             Forgot password?
           </button>
         </div>

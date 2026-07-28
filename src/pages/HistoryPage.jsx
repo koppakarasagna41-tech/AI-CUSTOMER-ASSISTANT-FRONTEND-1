@@ -5,7 +5,7 @@
  * Uses placeholder data; replace with chatService.getConversations() calls.
  */
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   HiMagnifyingGlass,
@@ -15,24 +15,49 @@ import {
   HiArrowTopRightOnSquare,
 } from 'react-icons/hi2';
 
-import { useToast }  from '@/context/ToastContext';
+import { useToast } from '@/context/ToastContext';
 import Badge, { statusVariant } from '@/components/ui/Badge';
-import { PLACEHOLDER_CONVERSATIONS } from '@/utils/placeholderData';
 import { timeAgo, truncate } from '@/utils/helpers';
 import { CONVERSATION_STATUS } from '@/utils/constants';
+import chatService from '@/services/chatService';
 
 const STATUS_FILTERS = [
-  { label: 'All',      value: ''                              },
-  { label: 'Open',     value: CONVERSATION_STATUS.OPEN       },
-  { label: 'Pending',  value: CONVERSATION_STATUS.PENDING    },
-  { label: 'Resolved', value: CONVERSATION_STATUS.RESOLVED   },
+  { label: 'All', value: '' },
+  { label: 'Open', value: CONVERSATION_STATUS.OPEN },
+  { label: 'Pending', value: CONVERSATION_STATUS.PENDING },
+  { label: 'Resolved', value: CONVERSATION_STATUS.RESOLVED },
 ];
 
 export default function HistoryPage() {
-  const { toast }        = useToast();
-  const [search, setSearch]   = useState('');
-  const [filter, setFilter]   = useState('');
-  const [convs, setConvs]     = useState(PLACEHOLDER_CONVERSATIONS);
+  const { toast } = useToast();
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('');
+  const [convs, setConvs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadConversations() {
+      try {
+        const response = await chatService.getConversations();
+        const items = (response?.data ?? []).map((conversation) => ({
+          id: conversation.id || conversation.conversation_id,
+          title: conversation.title || 'Untitled conversation',
+          preview: conversation.title || 'No preview available',
+          status: conversation.status || 'open',
+          tags: conversation.tags || [],
+          updatedAt: conversation.updated_at || conversation.created_at,
+          messages: conversation.message_count ?? 0,
+        }));
+        setConvs(items);
+      } catch (err) {
+        toast.error(err.message || 'Unable to load conversations.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadConversations();
+  }, [toast]);
 
   const filtered = useMemo(() => {
     return convs.filter((c) => {
@@ -44,9 +69,14 @@ export default function HistoryPage() {
     });
   }, [convs, search, filter]);
 
-  function handleDelete(id) {
-    setConvs((prev) => prev.filter((c) => c.id !== id));
-    toast.success('Conversation deleted.');
+  async function handleDelete(id) {
+    try {
+      await chatService.deleteConversation(id);
+      setConvs((prev) => prev.filter((c) => c.id !== id));
+      toast.success('Conversation deleted.');
+    } catch (err) {
+      toast.error(err.message || 'Delete failed.');
+    }
   }
 
   return (
@@ -55,14 +85,14 @@ export default function HistoryPage() {
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0  }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Conversation History
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {convs.length} total conversations
+          {loading ? 'Loading conversations…' : `${convs.length} total conversations`}
         </p>
       </motion.div>
 
@@ -103,7 +133,11 @@ export default function HistoryPage() {
       </motion.div>
 
       {/* List */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-16 text-sm text-gray-500 dark:text-gray-400">
+          Loading conversations…
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <HiChatBubbleLeftRight className="w-12 h-12 text-gray-300 dark:text-gray-600" />
           <p className="text-gray-500 dark:text-gray-400 font-medium">No conversations found.</p>
@@ -123,7 +157,7 @@ export default function HistoryPage() {
               <motion.div
                 key={conv.id}
                 initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x:  0 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: idx * 0.04 }}
                 className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50
                            dark:hover:bg-gray-800/50 transition-colors group"
@@ -146,7 +180,7 @@ export default function HistoryPage() {
                     <div className="flex gap-1 mt-1.5 flex-wrap">
                       {conv.tags.map((tag) => (
                         <span key={tag}
-                              className="text-[10px] px-1.5 py-0.5 rounded-md
+                          className="text-[10px] px-1.5 py-0.5 rounded-md
                                          bg-gray-100 dark:bg-gray-700 text-gray-500
                                          dark:text-gray-400 font-medium">
                           #{tag}
