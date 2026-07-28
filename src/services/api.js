@@ -13,7 +13,7 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '@/utils/constants';
 
-const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').trim();
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com').trim();
 const normalizedBaseUrl = envBaseUrl.replace(/\/+$/, '');
 const baseURL = normalizedBaseUrl.endsWith('/api/v1') ? normalizedBaseUrl : normalizedBaseUrl.replace(/\/api\/?$/, '/api/v1');
 
