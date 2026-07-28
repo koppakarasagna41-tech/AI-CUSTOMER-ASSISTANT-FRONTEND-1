@@ -17,7 +17,6 @@ import {
   useContext,
   useReducer,
   useCallback,
-  useRef,
 } from 'react';
 import { generateId } from '@/utils/helpers';
 import chatService from '@/services/chatService';
@@ -63,7 +62,6 @@ const ChatContext = createContext(null);
 // ── Provider ─────────────────────────────────────────────────
 export function ChatProvider({ children }) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
-  const typingTimeout = useRef(null);
 
   /**
    * Send a user message and simulate an AI response.
@@ -119,7 +117,6 @@ export function ChatProvider({ children }) {
   }, [state.conversationId]);
 
   const clearConversation = useCallback(() => {
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
     dispatch({ type: 'CLEAR' });
   }, []);
 

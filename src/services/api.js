@@ -14,7 +14,8 @@ import axios from 'axios';
 import { STORAGE_KEYS } from '@/utils/constants';
 
 const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').trim();
-const baseURL = envBaseUrl.endsWith('/api/v1') ? envBaseUrl : envBaseUrl.replace(/\/api\/?$/, '/api/v1');
+const normalizedBaseUrl = envBaseUrl.replace(/\/+$/, '');
+const baseURL = normalizedBaseUrl.endsWith('/api/v1') ? normalizedBaseUrl : normalizedBaseUrl.replace(/\/api\/?$/, '/api/v1');
 
 const api = axios.create({
   baseURL,
@@ -35,7 +36,10 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (token && !config.url?.includes('/auth/refresh')) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = {
+        ...(config.headers ?? {}),
+        Authorization: `Bearer ${token}`,
+      };
     }
     return config;
   },
@@ -72,7 +76,7 @@ api.interceptors.response.use(
       }
 
       clearAuthSession();
-      if (!window.location.pathname.includes('/login')) {
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         window.location.assign('/login');
       }
     }
