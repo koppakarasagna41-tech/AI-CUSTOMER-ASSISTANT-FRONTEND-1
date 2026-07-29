@@ -11,13 +11,15 @@
  */
 
 import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { STORAGE_KEYS } from '@/utils/constants';
+import { STORAGE_KEYS, USER_ROLE } from '@/utils/constants';
 import authService from '@/services/authService';
+import userService from '@/services/userService';
 
-// ── Initial state ────────────────────────────────────────────
+// ── Initial state ──────────────────────────────────────────────────
 const initialState = {
   user: null,   // { id, name, email, avatar, role }
-  token: null,   // JWT string
+  token: null,  // JWT string
+  isAdmin: false,
   isAuthenticated: false,
   isLoading: true,   // true while hydrating from localStorage
 };
@@ -30,6 +32,7 @@ function authReducer(state, action) {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        isAdmin: action.payload.user?.role === USER_ROLE.ADMIN,
         isAuthenticated: !!action.payload.token,
         isLoading: false,
       };
@@ -39,6 +42,7 @@ function authReducer(state, action) {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        isAdmin: action.payload.user?.role === USER_ROLE.ADMIN,
         isAuthenticated: true,
         isLoading: false,
       };
@@ -53,6 +57,9 @@ function authReducer(state, action) {
       return {
         ...state,
         user: { ...state.user, ...action.payload },
+        isAdmin: action.payload.role
+          ? action.payload.role === USER_ROLE.ADMIN
+          : state.isAdmin,
       };
 
     default:
@@ -67,15 +74,49 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Hydrate auth state from localStorage on mount
+  // Hydrate auth state from localStorage on mount and refresh the current user profile.
   useEffect(() => {
-    try {
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH_USER) || 'null');
-      dispatch({ type: 'HYDRATE', payload: { token, user } });
-    } catch {
-      dispatch({ type: 'HYDRATE', payload: { token: null, user: null } });
+    let mounted = true;
+
+    async function hydrate() {
+      try {
+        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+        const storedUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH_USER) || 'null');
+
+        if (!token) {
+          if (mounted) {
+            dispatch({ type: 'HYDRATE', payload: { token: null, user: null } });
+          }
+          return;
+        }
+
+        dispatch({ type: 'HYDRATE', payload: { token, user: storedUser } });
+
+        try {
+          const currentUser = await userService.getProfile();
+          if (mounted) {
+            localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(currentUser));
+            dispatch({ type: 'LOGIN', payload: { user: currentUser, token } });
+          }
+        } catch {
+          if (mounted) {
+            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+            dispatch({ type: 'LOGOUT' });
+          }
+        }
+      } catch {
+        if (mounted) {
+          dispatch({ type: 'HYDRATE', payload: { token: null, user: null } });
+        }
+      }
     }
+
+    hydrate();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // ── Actions ─────────────────────────────────────────────────

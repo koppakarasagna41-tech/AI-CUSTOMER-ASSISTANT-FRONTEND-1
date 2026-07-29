@@ -9,7 +9,7 @@
  */
 
 import { NavLink } from 'react-router-dom';
-import { motion }  from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   HiHome,
   HiChatBubbleLeftRight,
@@ -21,15 +21,15 @@ import {
 
 import { ROUTES } from '@/utils/constants';
 import { useAuth } from '@/context/AuthContext';
-import Avatar      from '@/components/ui/Avatar';
+import Avatar from '@/components/ui/Avatar';
 
 // ── Navigation items ─────────────────────────────────────────
 const NAV_ITEMS = [
-  { to: ROUTES.HOME,      label: 'Home',       icon: HiHome                },
-  { to: ROUTES.CHAT,      label: 'AI Chat',    icon: HiChatBubbleLeftRight },
-  { to: ROUTES.HISTORY,   label: 'History',    icon: HiClipboardDocumentList },
-  { to: ROUTES.ANALYTICS, label: 'Analytics',  icon: HiChartBarSquare      },
-  { to: ROUTES.SETTINGS,  label: 'Settings',   icon: HiCog6Tooth           },
+  { to: ROUTES.HOME, label: 'Home', icon: HiHome },
+  { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
+  { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
+  { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
+  { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
 ];
 
 function NavItem({ to, label, icon: Icon }) {
@@ -57,7 +57,7 @@ function NavItem({ to, label, icon: Icon }) {
           )}
           <Icon className={`relative w-5 h-5 flex-shrink-0 transition-colors
                             ${isActive ? 'text-primary-600 dark:text-primary-400'
-                                       : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
+              : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
           <span className="relative">{label}</span>
         </>
       )}
@@ -66,7 +66,8 @@ function NavItem({ to, label, icon: Icon }) {
 }
 
 export default function Sidebar() {
-  const { user } = useAuth();
+  const { isAdmin, user } = useAuth();
+  const visibleNavItems = NAV_ITEMS.filter((item) => item.to !== ROUTES.ANALYTICS || isAdmin);
 
   return (
     <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0
@@ -88,7 +89,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Main navigation">
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavItem key={item.to} {...item} />
         ))}
       </nav>

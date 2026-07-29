@@ -22,6 +22,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -36,23 +37,23 @@ import {
 // ── Types ─────────────────────────────────────────────────────
 const VARIANTS = {
   success: {
-    icon:  HiCheckCircle,
-    base:  'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300',
+    icon: HiCheckCircle,
+    base: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300',
     icon_: 'text-green-500',
   },
   error: {
-    icon:  HiXCircle,
-    base:  'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300',
+    icon: HiXCircle,
+    base: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300',
     icon_: 'text-red-500',
   },
   info: {
-    icon:  HiInformationCircle,
-    base:  'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300',
+    icon: HiInformationCircle,
+    base: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300',
     icon_: 'text-blue-500',
   },
   warning: {
-    icon:  HiExclamationTriangle,
-    base:  'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300',
+    icon: HiExclamationTriangle,
+    base: 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300',
     icon_: 'text-yellow-500',
   },
 };
@@ -76,8 +77,8 @@ function ToastItem({ id, type = 'info', message, onRemove }) {
     <motion.div
       layout
       initial={{ opacity: 0, y: -20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0,   scale: 1    }}
-      exit={{    opacity: 0, y: -10, scale: 0.95  }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={`flex items-start gap-3 min-w-[280px] max-w-sm w-full
                   px-4 py-3 rounded-xl border shadow-soft text-sm font-medium
@@ -100,20 +101,35 @@ function ToastItem({ id, type = 'info', message, onRemove }) {
 // ── Provider ─────────────────────────────────────────────────
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  const toastMessagesRef = useRef(new Set());
 
   const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      if (next.length !== prev.length) {
+        const removed = prev.find((toast) => toast.id === id);
+        if (removed) {
+          toastMessagesRef.current.delete(removed.message);
+        }
+      }
+      return next;
+    });
   }, []);
 
   const addToast = useCallback((type, message) => {
+    if (!message || toastMessagesRef.current.has(message)) {
+      return null;
+    }
+    toastMessagesRef.current.add(message);
     const id = ++nextId;
     setToasts((prev) => [...prev, { id, type, message }]);
+    return id;
   }, []);
 
   const toast = {
     success: (msg) => addToast('success', msg),
-    error:   (msg) => addToast('error',   msg),
-    info:    (msg) => addToast('info',    msg),
+    error: (msg) => addToast('error', msg),
+    info: (msg) => addToast('info', msg),
     warning: (msg) => addToast('warning', msg),
   };
 

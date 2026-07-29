@@ -21,21 +21,22 @@ import {
   HiSparkles,
 } from 'react-icons/hi2';
 
-import { ROUTES }  from '@/utils/constants';
+import { ROUTES } from '@/utils/constants';
 import { useAuth } from '@/context/AuthContext';
-import Avatar      from '@/components/ui/Avatar';
+import Avatar from '@/components/ui/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV_ITEMS = [
-  { to: ROUTES.HOME,      label: 'Home',      icon: HiHome                },
-  { to: ROUTES.CHAT,      label: 'AI Chat',   icon: HiChatBubbleLeftRight },
-  { to: ROUTES.HISTORY,   label: 'History',   icon: HiClipboardDocumentList },
-  { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare      },
-  { to: ROUTES.SETTINGS,  label: 'Settings',  icon: HiCog6Tooth           },
+  { to: ROUTES.HOME, label: 'Home', icon: HiHome },
+  { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
+  { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
+  { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
+  { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
 ];
 
 export default function MobileNav({ isOpen, onClose }) {
-  const { user } = useAuth();
+  const { isAdmin, user } = useAuth();
+  const visibleNavItems = NAV_ITEMS.filter((item) => item.to !== ROUTES.ANALYTICS || isAdmin);
 
   return (
     <AnimatePresence>
@@ -46,7 +47,7 @@ export default function MobileNav({ isOpen, onClose }) {
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{    opacity: 0 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
             className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
@@ -57,8 +58,8 @@ export default function MobileNav({ isOpen, onClose }) {
           <motion.aside
             key="drawer"
             initial={{ x: '-100%' }}
-            animate={{ x: 0       }}
-            exit={{    x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col
                        bg-white dark:bg-gray-900 shadow-xl md:hidden"
@@ -88,7 +89,7 @@ export default function MobileNav({ isOpen, onClose }) {
 
             {/* Nav links */}
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-              {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+              {visibleNavItems.map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
                   to={to}

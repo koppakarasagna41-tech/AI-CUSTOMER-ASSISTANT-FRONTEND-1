@@ -64,6 +64,13 @@ api.interceptors.response.use(
       || error.message
       || 'An unexpected error occurred.';
 
+    if (status === 403) {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.location.replace('/');
+      }
+      return Promise.reject({ status, message: 'You are not authorized to access this resource.', raw: error });
+    }
+
     if (status === 401 && !originalRequest?._retry && !originalRequest?.url?.includes('/auth/login') && !originalRequest?.url?.includes('/auth/refresh')) {
       const refreshToken = localStorage.getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
       if (refreshToken) {
@@ -78,14 +85,16 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return api(originalRequest);
           }
-        } catch (refreshError) {
-          // fall through to session clear
+        } catch {
+          // refresh failed, clear the session below
         }
       }
+    }
 
+    if (status === 401) {
       clearAuthSession();
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.assign('/login');
+      if (typeof window !== 'undefined') {
+        window.location.replace('/login');
       }
     }
 

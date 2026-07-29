@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   HiChatBubbleLeftRight,
@@ -21,10 +22,11 @@ import {
 } from 'react-icons/hi2';
 
 import StatCard from '@/components/ui/StatCard';
-import { ANALYTICS_PERIODS } from '@/utils/constants';
+import { ANALYTICS_PERIODS, ROUTES } from '@/utils/constants';
 import { formatCount as fmtCount } from '@/utils/helpers';
 import analyticsService from '@/services/analyticsService';
 import { useToast } from '@/context/ToastContext';
+import { useAuth } from '@/context/AuthContext';
 
 // Pure-CSS bar chart
 function BarChart({ data }) {
@@ -101,6 +103,8 @@ function SatisfactionRing({ score }) {
 
 export default function AnalyticsPage() {
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [period, setPeriod] = useState('last_30_days');
   const [metrics, setMetrics] = useState(null);
   const [dailyChart, setDailyChart] = useState([]);
@@ -108,6 +112,12 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAdmin) {
+      toast.info('Analytics is only available to administrators. Redirecting to home.');
+      navigate(ROUTES.HOME, { replace: true });
+      return;
+    }
+
     async function loadAnalytics() {
       try {
         const [overviewResponse, chartResponse, issuesResponse] = await Promise.all([
@@ -129,7 +139,7 @@ export default function AnalyticsPage() {
     }
 
     loadAnalytics();
-  }, [period, toast]);
+  }, [period, toast, isAdmin, navigate]);
 
   const KPI_CARDS = useMemo(() => [
     {
