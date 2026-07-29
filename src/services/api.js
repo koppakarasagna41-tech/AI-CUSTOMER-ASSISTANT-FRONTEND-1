@@ -19,7 +19,7 @@ const baseURL = normalizedBaseUrl.endsWith('/api/v1') ? normalizedBaseUrl : norm
 
 const api = axios.create({
   baseURL,
-  timeout: 15_000,
+  timeout: 60_000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -51,7 +51,10 @@ api.interceptors.response.use(
   async (error) => {
     const status = error.response?.status;
     const originalRequest = error.config;
-    const message = error.response?.data?.message
+    const isTimeout = error.code === 'ECONNABORTED' && error.message?.includes('timeout');
+    const message = isTimeout
+      ? 'The request timed out. Please try again in a moment.'
+      : error.response?.data?.message
       || error.response?.data?.detail
       || error.message
       || 'An unexpected error occurred.';
