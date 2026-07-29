@@ -13,9 +13,14 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '@/utils/constants';
 
-const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com').trim();
-const normalizedBaseUrl = envBaseUrl.replace(/\/+$/, '');
-const baseURL = normalizedBaseUrl.endsWith('/api/v1') ? normalizedBaseUrl : normalizedBaseUrl.replace(/\/api\/?$/, '/api/v1');
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com')
+  .trim()
+  .replace(/\/+$|\s+$/g, '');
+const baseURL = envBaseUrl.endsWith('/api/v1')
+  ? envBaseUrl
+  : envBaseUrl.endsWith('/api')
+    ? `${envBaseUrl}/v1`
+    : `${envBaseUrl}/api/v1`;
 
 const api = axios.create({
   baseURL,

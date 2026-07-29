@@ -60,12 +60,5 @@ export async function logout() {
   return { success: true };
 }
 
-/**
- * Request a password-reset email.
- */
-export async function forgotPassword({ email }) {
-  return api.post('/auth/forgot-password', { email });
-}
-
-const authService = { login, register, logout, forgotPassword };
+const authService = { login, register, logout };
 export default authService;
