@@ -14,6 +14,7 @@ import {
   HiHome,
   HiChatBubbleLeftRight,
   HiClipboardDocumentList,
+  HiTicket,
   HiChartBarSquare,
   HiCog6Tooth,
   HiSparkles,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { to: ROUTES.HOME, label: 'Home', icon: HiHome },
   { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
   { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
+  { to: ROUTES.TICKETS, label: 'Tickets', icon: HiTicket },
   { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
 ];

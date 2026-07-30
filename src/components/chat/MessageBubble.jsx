@@ -11,24 +11,29 @@
  */
 
 import { motion } from 'framer-motion';
-import { HiSparkles, HiCheck, HiCheckCircle } from 'react-icons/hi2';
-import Avatar    from '@/components/ui/Avatar';
+import { HiSparkles, HiCheck, HiCheckCircle, HiTicket } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
+import Avatar from '@/components/ui/Avatar';
 import { formatTime } from '@/utils/helpers';
+import { ROUTES } from '@/utils/constants';
 
 function StatusIcon({ status }) {
   if (status === 'sending') return <HiCheck className="w-3 h-3 text-gray-400" />;
-  if (status === 'sent')    return <HiCheck className="w-3 h-3 text-blue-400" />;
+  if (status === 'sent') return <HiCheck className="w-3 h-3 text-blue-400" />;
   if (status === 'delivered') return <HiCheckCircle className="w-3 h-3 text-blue-500" />;
   return null;
 }
 
 export default function MessageBubble({ message, user }) {
+  const navigate = useNavigate();
   const isUser = message.role === 'user';
+  const isAssistant = message.role === 'assistant';
+  const shouldShowTicketAction = isAssistant && /can|unable|can't|cannot|escalat|ticket/i.test(message.content || '');
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0,  scale: 1    }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className={`flex items-end gap-2 mb-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
     >
@@ -57,9 +62,20 @@ export default function MessageBubble({ message, user }) {
           {message.content}
         </div>
 
+        {shouldShowTicketAction && (
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.TICKETS)}
+            className="inline-flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-sm font-medium text-primary-700 transition hover:bg-primary-100 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300"
+          >
+            <HiTicket className="w-4 h-4" />
+            Create Ticket
+          </button>
+        )}
+
         {/* Timestamp + status */}
         <div className={`flex items-center gap-1 ${isUser ? 'flex-row-reverse' : ''}`}>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+          <span className="text-[10px] text-gray-400 dark:text-gray-400">
             {formatTime(message.timestamp)}
           </span>
           {isUser && <StatusIcon status={message.status} />}

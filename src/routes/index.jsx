@@ -21,22 +21,23 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // ── Layouts ──────────────────────────────────────────────────
-import MainLayout  from '@/layouts/MainLayout';
-import AuthLayout  from '@/layouts/AuthLayout';
+import MainLayout from '@/layouts/MainLayout';
+import AuthLayout from '@/layouts/AuthLayout';
 
 // ── Route guards ─────────────────────────────────────────────
 import ProtectedRoute from './ProtectedRoute';
-import PublicRoute    from './PublicRoute';
+import PublicRoute from './PublicRoute';
 
 // ── Pages ─────────────────────────────────────────────────────
-import HomePage      from '@/pages/HomePage';
-import LoginPage     from '@/pages/LoginPage';
-import RegisterPage  from '@/pages/RegisterPage';
-import ChatPage      from '@/pages/ChatPage';
-import HistoryPage   from '@/pages/HistoryPage';
+import HomePage from '@/pages/HomePage';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import ChatPage from '@/pages/ChatPage';
+import HistoryPage from '@/pages/HistoryPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
-import SettingsPage  from '@/pages/SettingsPage';
-import NotFoundPage  from '@/pages/NotFoundPage';
+import SettingsPage from '@/pages/SettingsPage';
+import TicketsPage from '@/pages/TicketsPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 // ── Constants ─────────────────────────────────────────────────
 import { ROUTES } from '@/utils/constants';
@@ -48,7 +49,7 @@ export default function AppRoutes() {
       {/* ── Public (auth) routes ──────────────────────────── */}
       <Route element={<PublicRoute />}>
         <Route element={<AuthLayout />}>
-          <Route path={ROUTES.LOGIN}    element={<LoginPage />} />
+          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
           <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
         </Route>
       </Route>
@@ -56,11 +57,12 @@ export default function AppRoutes() {
       {/* ── Protected (app) routes ───────────────────────── */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          <Route index                      element={<HomePage />} />
-          <Route path={ROUTES.CHAT}         element={<ChatPage />} />
-          <Route path={ROUTES.HISTORY}      element={<HistoryPage />} />
-          <Route path={ROUTES.ANALYTICS}    element={<AnalyticsPage />} />
-          <Route path={ROUTES.SETTINGS}     element={<SettingsPage />} />
+          <Route index element={<HomePage />} />
+          <Route path={ROUTES.CHAT} element={<ChatPage />} />
+          <Route path={ROUTES.HISTORY} element={<HistoryPage />} />
+          <Route path={ROUTES.TICKETS} element={<TicketsPage />} />
+          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+          <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>
       </Route>
 

@@ -16,6 +16,7 @@ export const ROUTES = {
   REGISTER: '/register',
   CHAT: '/chat',
   HISTORY: '/history',
+  TICKETS: '/tickets',
   ANALYTICS: '/analytics',
   SETTINGS: '/settings',
   NOT_FOUND: '*',
