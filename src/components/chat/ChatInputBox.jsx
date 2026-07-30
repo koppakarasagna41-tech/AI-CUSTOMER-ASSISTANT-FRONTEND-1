@@ -26,8 +26,8 @@ import {
 const MAX_CHARS = 2000;
 
 export default function ChatInputBox({ onSend, disabled = false }) {
-  const [value, setValue]       = useState('');
-  const textareaRef             = useRef(null);
+  const [value, setValue] = useState('');
+  const textareaRef = useRef(null);
 
   // Auto-grow the textarea
   function handleChange(e) {
@@ -56,19 +56,19 @@ export default function ChatInputBox({ onSend, disabled = false }) {
     }
   }
 
-  const charCount    = value.length;
-  const nearLimit    = charCount > MAX_CHARS * 0.85;
-  const overLimit    = charCount > MAX_CHARS;
-  const canSend      = value.trim().length > 0 && !disabled && !overLimit;
+  const charCount = value.length;
+  const nearLimit = charCount > MAX_CHARS * 0.85;
+  const overLimit = charCount > MAX_CHARS;
+  const canSend = value.trim().length > 0 && !disabled && !overLimit;
 
   return (
     <div className="border-t border-gray-200 dark:border-gray-700 bg-white
-                    dark:bg-gray-900 px-4 py-3">
-      <div className={`flex items-end gap-2 rounded-2xl border px-4 py-2 transition-colors
+                    dark:bg-gray-900 px-3 py-3 sm:px-4">
+      <div className={`flex items-end gap-2 rounded-2xl border px-3 py-2 sm:px-4 transition-colors min-h-[48px]
                        ${disabled
-                         ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
-                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400'
-                       }`}>
+          ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+          : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400'
+        }`}>
 
         {/* Attachment placeholder */}
         <button
@@ -92,7 +92,7 @@ export default function ChatInputBox({ onSend, disabled = false }) {
           rows={1}
           maxLength={MAX_CHARS + 50}          // allow slight over to show counter
           aria-label="Message input"
-          className="flex-1 resize-none bg-transparent text-sm text-gray-900
+          className="flex-1 resize-none bg-transparent text-[15px] sm:text-sm text-gray-900
                      dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none leading-relaxed py-1 max-h-40 no-scrollbar
                      disabled:cursor-not-allowed"
@@ -129,16 +129,16 @@ export default function ChatInputBox({ onSend, disabled = false }) {
             <motion.button
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{    scale: 0, opacity: 0 }}
+              exit={{ scale: 0, opacity: 0 }}
               type="button"
               onClick={handleSend}
               disabled={!canSend}
               aria-label="Send message"
               className={`p-1.5 rounded-xl transition-all duration-200
                          ${canSend
-                           ? 'bg-primary-600 text-white hover:bg-primary-700 active:scale-95'
-                           : 'bg-gray-200 text-gray-400 dark:bg-gray-700 cursor-not-allowed'
-                         }`}
+                  ? 'bg-primary-600 text-white hover:bg-primary-700 active:scale-95'
+                  : 'bg-gray-200 text-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                }`}
             >
               <HiPaperAirplane className="w-4 h-4" />
             </motion.button>
@@ -147,7 +147,7 @@ export default function ChatInputBox({ onSend, disabled = false }) {
       </div>
 
       {/* Footer row: hint + char count */}
-      <div className="flex items-center justify-between mt-1.5 px-1">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between mt-1.5 px-1">
         <p className="text-[11px] text-gray-400 dark:text-gray-500">
           Press <kbd className="font-mono">Enter</kbd> to send ·{' '}
           <kbd className="font-mono">Shift+Enter</kbd> for new line

@@ -105,7 +105,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 sm:space-y-8">
 
       {/* ── Hero greeting ────────────────────────────────────── */}
       <motion.div {...fadeUp(0)}>
@@ -131,7 +131,7 @@ export default function HomePage() {
       {/* ── KPI row ──────────────────────────────────────────── */}
       <motion.div
         {...fadeUp(0.05)}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
       >
         {KPI.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="card p-4 flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function HomePage() {
                        uppercase tracking-wide mb-3">
           Quick Actions
         </h2>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           {QUICK_ACTIONS.map(({ to, label, desc, icon: Icon, color, shadow }) => (
             <Link
               key={to}
@@ -204,7 +204,7 @@ export default function HomePage() {
             <Link
               key={conv.id}
               to={ROUTES.HISTORY}
-              className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50
+              className="flex flex-col gap-3 px-5 py-4 hover:bg-gray-50 sm:flex-row sm:items-center sm:gap-4
                          dark:hover:bg-gray-800/50 transition-colors"
             >
               <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20
@@ -219,7 +219,7 @@ export default function HomePage() {
                   {conv.preview}
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <div className="flex flex-wrap items-start justify-between gap-1.5 sm:flex-col sm:items-end sm:justify-start flex-shrink-0">
                 <Badge variant={statusVariant(conv.status)} dot>
                   {conv.status}
                 </Badge>

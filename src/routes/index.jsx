@@ -38,6 +38,7 @@ import ConversationDetailPage from '@/pages/ConversationDetailPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import TicketsPage from '@/pages/TicketsPage';
+import KnowledgePage from '@/pages/KnowledgePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 // ── Constants ─────────────────────────────────────────────────
@@ -63,6 +64,7 @@ export default function AppRoutes() {
           <Route path={ROUTES.HISTORY} element={<HistoryPage />} />
           <Route path={ROUTES.CONVERSATION_DETAIL} element={<ConversationDetailPage />} />
           <Route path={ROUTES.TICKETS} element={<TicketsPage />} />
+          <Route path={ROUTES.KNOWLEDGE} element={<KnowledgePage />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>

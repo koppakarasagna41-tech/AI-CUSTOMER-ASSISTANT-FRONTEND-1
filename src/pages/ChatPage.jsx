@@ -6,12 +6,17 @@
  * state is scoped to this page only.
  */
 
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ChatProvider } from '@/context/ChatContext';
-import ChatWindow       from '@/components/chat/ChatWindow';
+import ChatWindow from '@/components/chat/ChatWindow';
 
 export default function ChatPage() {
+  const [searchParams] = useSearchParams();
+  const initialConversationId = useMemo(() => searchParams.get('conversationId'), [searchParams]);
+
   return (
-    <ChatProvider>
+    <ChatProvider initialConversationId={initialConversationId}>
       {/* 
         Use calc to fill the remaining viewport height minus the 
         sticky Navbar (h-16 = 4rem).

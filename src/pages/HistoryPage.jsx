@@ -1,8 +1,7 @@
 /**
  * HistoryPage.jsx
  *
- * Lists all past conversations with search, filter, and sort controls.
- * Uses placeholder data; replace with chatService.getConversations() calls.
+ * Lists past conversations with search, filter, and action controls.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -82,7 +81,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* Header */}
       <motion.div
@@ -103,7 +102,7 @@ export default function HistoryPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.05 }}
-        className="flex flex-col sm:flex-row gap-3"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center"
       >
         {/* Search */}
         <div className="relative flex-1">
@@ -161,7 +160,7 @@ export default function HistoryPage() {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: idx * 0.04 }}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50
+                className="flex flex-col gap-3 px-5 py-4 hover:bg-gray-50 sm:flex-row sm:items-center sm:gap-4
                            dark:hover:bg-gray-800/50 transition-colors group"
               >
                 {/* Icon */}
@@ -193,7 +192,7 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Meta */}
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <div className="flex flex-wrap items-start justify-between gap-1.5 sm:flex-col sm:items-end sm:justify-start flex-shrink-0">
                   <Badge variant={statusVariant(conv.status)} dot>
                     {conv.status}
                   </Badge>
@@ -202,8 +201,8 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Actions (visible on hover) */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100
-                                transition-opacity flex-shrink-0">
+                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100
+                                transition-opacity flex-shrink-0 self-end sm:self-auto">
                   <button
                     aria-label="Open conversation"
                     onClick={() => navigate(ROUTES.CONVERSATION_DETAIL.replace(':conversationId', conv.id))}

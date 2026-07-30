@@ -19,20 +19,20 @@ import {
   HiCheckCircle,
 } from 'react-icons/hi2';
 
-import { useAuth }    from '@/context/AuthContext';
-import { useTheme }   from '@/context/ThemeContext';
-import { useToast }   from '@/context/ToastContext';
-import userService    from '@/services/userService';
-import Input          from '@/components/ui/Input';
-import Button         from '@/components/ui/Button';
-import Avatar         from '@/components/ui/Avatar';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { useToast } from '@/context/ToastContext';
+import userService from '@/services/userService';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import Avatar from '@/components/ui/Avatar';
 
 // ── Tab definitions ───────────────────────────────────────────
 const TABS = [
-  { id: 'profile',       label: 'Profile',       icon: HiUser       },
-  { id: 'security',      label: 'Security',       icon: HiLockClosed },
-  { id: 'appearance',    label: 'Appearance',     icon: HiPaintBrush },
-  { id: 'notifications', label: 'Notifications',  icon: HiBell       },
+  { id: 'profile', label: 'Profile', icon: HiUser },
+  { id: 'security', label: 'Security', icon: HiLockClosed },
+  { id: 'appearance', label: 'Appearance', icon: HiPaintBrush },
+  { id: 'notifications', label: 'Notifications', icon: HiBell },
 ];
 
 // ── Toggle component ──────────────────────────────────────────
@@ -65,10 +65,10 @@ function Toggle({ checked, onChange, label, description }) {
 // ── Profile tab ───────────────────────────────────────────────
 function ProfileTab() {
   const { user, updateUser } = useAuth();
-  const { toast }            = useToast();
+  const { toast } = useToast();
   const [form, setForm] = useState({ name: user?.name ?? '', email: user?.email ?? '' });
   const [saving, setSaving] = useState(false);
-  const [saved,  setSaved]  = useState(false);
+  const [saved, setSaved] = useState(false);
 
   async function handleSave(e) {
     e.preventDefault();
@@ -128,7 +128,7 @@ function ProfileTab() {
         {saved && (
           <motion.span
             initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x:  0 }}
+            animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400"
           >
             <HiCheckCircle className="w-4 h-4" /> Saved
@@ -141,7 +141,7 @@ function ProfileTab() {
 
 // ── Security tab ──────────────────────────────────────────────
 function SecurityTab() {
-  const { toast }   = useToast();
+  const { toast } = useToast();
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
   const [saving, setSaving] = useState(false);
 
@@ -165,11 +165,11 @@ function SecurityTab() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
       <Input label="Current password" type="password" value={form.current}
-             onChange={(e) => setForm((p) => ({ ...p, current: e.target.value }))} />
+        onChange={(e) => setForm((p) => ({ ...p, current: e.target.value }))} />
       <Input label="New password" type="password" value={form.next}
-             onChange={(e) => setForm((p) => ({ ...p, next: e.target.value }))} />
+        onChange={(e) => setForm((p) => ({ ...p, next: e.target.value }))} />
       <Input label="Confirm new password" type="password" value={form.confirm}
-             onChange={(e) => setForm((p) => ({ ...p, confirm: e.target.value }))} />
+        onChange={(e) => setForm((p) => ({ ...p, confirm: e.target.value }))} />
       <Button type="submit" loading={saving}>Update password</Button>
     </form>
   );
@@ -185,16 +185,16 @@ function AppearanceTab() {
         <p className="label">Color theme</p>
         <div className="flex gap-3 mt-2">
           {[
-            { id: 'light', label: 'Light', bg: 'bg-white border-2',     active: theme === 'light' },
-            { id: 'dark',  label: 'Dark',  bg: 'bg-gray-900 border-2',  active: theme === 'dark'  },
+            { id: 'light', label: 'Light', bg: 'bg-white border-2', active: theme === 'light' },
+            { id: 'dark', label: 'Dark', bg: 'bg-gray-900 border-2', active: theme === 'dark' },
           ].map(({ id, label, bg, active }) => (
             <button
               key={id}
               onClick={() => id === 'light' ? setLightTheme() : setDarkTheme()}
               className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all
                           ${bg} ${active
-                            ? 'border-primary-500 shadow-glow'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
+                  ? 'border-primary-500 shadow-glow'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
             >
               <div className={`w-16 h-10 rounded-lg ${id === 'light' ? 'bg-gray-100' : 'bg-gray-700'}`} />
               <span className={`text-xs font-medium ${active ? 'text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400'}`}>
@@ -212,11 +212,11 @@ function AppearanceTab() {
 // ── Notifications tab ─────────────────────────────────────────
 function NotificationsTab() {
   const [prefs, setPrefs] = useState({
-    newConversation:  true,
-    resolvedTicket:   true,
-    weeklyReport:     false,
-    aiAlerts:         true,
-    emailDigest:      false,
+    newConversation: true,
+    resolvedTicket: true,
+    weeklyReport: false,
+    aiAlerts: true,
+    emailDigest: false,
   });
   const { toast } = useToast();
 
@@ -229,18 +229,18 @@ function NotificationsTab() {
   }
 
   const items = [
-    { key: 'newConversation', label: 'New conversation assigned',    desc: 'Alert when a conversation is assigned to you.' },
-    { key: 'resolvedTicket',  label: 'Ticket resolved',              desc: 'Notify when AI resolves a ticket.' },
-    { key: 'weeklyReport',    label: 'Weekly performance report',    desc: 'Get a summary email every Monday.' },
-    { key: 'aiAlerts',        label: 'AI confidence alerts',         desc: 'Alert when AI confidence drops below 70%.' },
-    { key: 'emailDigest',     label: 'Daily email digest',           desc: 'Receive a daily email with support stats.' },
+    { key: 'newConversation', label: 'New conversation assigned', desc: 'Alert when a conversation is assigned to you.' },
+    { key: 'resolvedTicket', label: 'Ticket resolved', desc: 'Notify when AI resolves a ticket.' },
+    { key: 'weeklyReport', label: 'Weekly performance report', desc: 'Get a summary email every Monday.' },
+    { key: 'aiAlerts', label: 'AI confidence alerts', desc: 'Alert when AI confidence drops below 70%.' },
+    { key: 'emailDigest', label: 'Daily email digest', desc: 'Receive a daily email with support stats.' },
   ];
 
   return (
     <div>
       {items.map(({ key, label, desc }) => (
         <Toggle key={key} checked={prefs[key]} onChange={() => toggle(key)}
-                label={label} description={desc} />
+          label={label} description={desc} />
       ))}
     </div>
   );
@@ -248,9 +248,9 @@ function NotificationsTab() {
 
 // ── Page ──────────────────────────────────────────────────────
 const TAB_CONTENT = {
-  profile:       <ProfileTab />,
-  security:      <SecurityTab />,
-  appearance:    <AppearanceTab />,
+  profile: <ProfileTab />,
+  security: <SecurityTab />,
+  appearance: <AppearanceTab />,
   notifications: <NotificationsTab />,
 };
 
@@ -258,10 +258,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0  }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="mb-6"
       >
@@ -271,10 +271,10 @@ export default function SettingsPage() {
         </p>
       </motion.div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Tab list */}
-        <nav className="md:w-52 flex md:flex-col gap-1 overflow-x-auto md:overflow-visible
-                        pb-2 md:pb-0 shrink-0">
+        <nav className="lg:w-52 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible
+                        pb-2 lg:pb-0 shrink-0">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -282,9 +282,9 @@ export default function SettingsPage() {
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium
                           whitespace-nowrap transition-colors w-full text-left
                           ${activeTab === id
-                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {label}
@@ -298,8 +298,8 @@ export default function SettingsPage() {
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0  }}
-              exit={{    opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
               <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-5 capitalize">

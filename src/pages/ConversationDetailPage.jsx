@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HiArrowLeft, HiChatBubbleLeftRight, HiClock, HiExclamationTriangle, HiPaperAirplane } from 'react-icons/hi2';
+import { HiArrowLeft, HiChatBubbleLeftRight, HiClock, HiExclamationTriangle, HiArrowRightOnRectangle } from 'react-icons/hi2';
 
 import { useToast } from '@/context/ToastContext';
 import Button from '@/components/ui/Button';
@@ -21,16 +21,31 @@ export default function ConversationDetailPage() {
     const { toast } = useToast();
     const [conversation, setConversation] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [draft, setDraft] = useState('');
-    const [sending, setSending] = useState(false);
 
     const loadConversation = useCallback(async () => {
         if (!conversationId) return;
 
         try {
             setLoading(true);
-            const data = await historyService.getHistory(conversationId);
-            setConversation(data || null);
+            const [conversationResponse, historyResponse] = await Promise.allSettled([
+                chatService.getConversation(conversationId),
+                historyService.getHistory(conversationId),
+            ]);
+
+            const metadata = conversationResponse.status === 'fulfilled' ? conversationResponse.value : null;
+            const history = historyResponse.status === 'fulfilled' ? historyResponse.value : null;
+
+            setConversation({
+                ...(metadata || {}),
+                ...(history || {}),
+                title: history?.title || metadata?.title || 'Conversation details',
+                conversation_id: history?.conversation_id || metadata?.conversation_id || conversationId,
+                messages: history?.messages ?? [],
+                message_count: history?.message_count ?? metadata?.message_count ?? (history?.messages?.length ?? 0),
+                created_at: history?.created_at || metadata?.created_at,
+                status: history?.status || metadata?.status || 'open',
+                linked_tickets: history?.linked_tickets || metadata?.linked_tickets || [],
+            });
         } catch (error) {
             toast.error(error?.message || 'Unable to load conversation details.');
         } finally {
@@ -51,28 +66,18 @@ export default function ConversationDetailPage() {
         };
     }, [conversation]);
 
-    async function handleContinueChat(event) {
-        event.preventDefault();
-        const content = draft.trim();
-        if (!content || !conversationId || sending) return;
-
-        try {
-            setSending(true);
-            await chatService.sendMessage({ conversationId, content });
-            setDraft('');
-            await loadConversation();
-            toast.success('Message sent.');
-        } catch (error) {
-            toast.error(error?.message || 'Unable to send the message.');
-        } finally {
-            setSending(false);
-        }
+    function handleContinueChat() {
+        if (!conversationId) return;
+        navigate({
+            pathname: ROUTES.CHAT,
+            search: `?conversationId=${encodeURIComponent(conversationId)}`,
+        });
     }
 
     return (
-        <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Button
                         variant="secondary"
                         leftIcon={<HiArrowLeft className="w-4 h-4" />}
@@ -100,7 +105,7 @@ export default function ConversationDetailPage() {
                     Conversation not found.
                 </div>
             ) : (
-                <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+                <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
                     <div className="space-y-4">
                         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                             <div className="flex items-center gap-2">
@@ -200,21 +205,12 @@ export default function ConversationDetailPage() {
 
                         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Continue chatting</h2>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Send a follow-up message in the same conversation.</p>
-                            <form className="mt-4 space-y-3" onSubmit={handleContinueChat}>
-                                <textarea
-                                    rows={4}
-                                    value={draft}
-                                    onChange={(event) => setDraft(event.target.value)}
-                                    placeholder="Ask a follow-up question..."
-                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                                />
-                                <div className="flex items-center justify-end">
-                                    <Button type="submit" loading={sending} leftIcon={<HiPaperAirplane className="w-4 h-4" />}>
-                                        Send message
-                                    </Button>
-                                </div>
-                            </form>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Open the chat experience with this conversation loaded.</p>
+                            <div className="mt-4 flex items-center justify-end">
+                                <Button variant="primary" onClick={handleContinueChat} leftIcon={<HiArrowRightOnRectangle className="w-4 h-4" />}>
+                                    Continue Chat
+                                </Button>
+                            </div>
                         </div>
                     </aside>
                 </div>

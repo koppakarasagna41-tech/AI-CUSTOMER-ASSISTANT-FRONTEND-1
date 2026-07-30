@@ -18,6 +18,7 @@ export const ROUTES = {
   HISTORY: '/history',
   CONVERSATION_DETAIL: '/history/:conversationId',
   TICKETS: '/tickets',
+  KNOWLEDGE: '/knowledge',
   ANALYTICS: '/analytics',
   SETTINGS: '/settings',
   NOT_FOUND: '*',

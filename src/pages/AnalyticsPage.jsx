@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
   ], [metrics]);
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
 
       {/* Header */}
       <motion.div
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
       {loading ? (
         <div className="text-sm text-gray-500 dark:text-gray-400">Loading analytics…</div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {KPI_CARDS.map((card, i) => (
             <motion.div
               key={card.title}
@@ -221,14 +221,14 @@ export default function AnalyticsPage() {
       )}
 
       {/* Charts row */}
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="grid gap-4 xl:grid-cols-3">
 
         {/* Bar chart */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.2 }}
-          className="card p-5 lg:col-span-2"
+          className="card p-5 xl:col-span-2"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">

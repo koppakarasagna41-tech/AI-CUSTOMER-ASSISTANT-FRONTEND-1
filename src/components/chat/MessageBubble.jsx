@@ -11,7 +11,7 @@
  */
 
 import { motion } from 'framer-motion';
-import { HiSparkles, HiCheck, HiCheckCircle, HiTicket } from 'react-icons/hi2';
+import { HiSparkles, HiCheck, HiCheckCircle, HiTicket, HiBookOpen } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '@/components/ui/Avatar';
 import { formatTime } from '@/utils/helpers';
@@ -29,6 +29,7 @@ export default function MessageBubble({ message, user }) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const shouldShowTicketAction = isAssistant && /can|unable|can't|cannot|escalat|ticket/i.test(message.content || '');
+  const sourceCount = message?.sources?.length || 0;
 
   return (
     <motion.div
@@ -48,11 +49,11 @@ export default function MessageBubble({ message, user }) {
       )}
 
       {/* Bubble */}
-      <div className={`flex flex-col gap-1 max-w-[75%] sm:max-w-[65%]
+      <div className={`flex flex-col gap-1 w-full max-w-[88%] sm:max-w-[75%] md:max-w-[65%]
                        ${isUser ? 'items-end' : 'items-start'}`}>
         <div
           className={`
-            px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm
+            px-4 py-2.5 rounded-2xl text-[15px] sm:text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap
             ${isUser
               ? 'bg-primary-600 text-white rounded-br-md'
               : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-md'
@@ -61,6 +62,13 @@ export default function MessageBubble({ message, user }) {
         >
           {message.content}
         </div>
+
+        {sourceCount > 0 ? (
+          <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <HiBookOpen className="w-4 h-4" />
+            Grounded in {sourceCount} reference{sourceCount === 1 ? '' : 's'}
+          </div>
+        ) : null}
 
         {shouldShowTicketAction && (
           <button

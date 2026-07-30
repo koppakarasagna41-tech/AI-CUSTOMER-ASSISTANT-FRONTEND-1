@@ -10,15 +10,15 @@
  */
 
 import { useRef, useEffect } from 'react';
-import { AnimatePresence }   from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { HiSparkles, HiArrowPath } from 'react-icons/hi2';
 
-import { useChat }       from '@/context/ChatContext';
-import { useAuth }       from '@/context/AuthContext';
-import MessageBubble     from './MessageBubble';
-import TypingIndicator   from './TypingIndicator';
-import ChatInputBox      from './ChatInputBox';
-import LoadingSpinner    from '@/components/ui/LoadingSpinner';
+import { useChat } from '@/context/ChatContext';
+import { useAuth } from '@/context/AuthContext';
+import MessageBubble from './MessageBubble';
+import TypingIndicator from './TypingIndicator';
+import ChatInputBox from './ChatInputBox';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // Empty-state illustration
 function EmptyState() {
@@ -77,7 +77,7 @@ export default function ChatWindow({ className = '' }) {
     <div className={`flex flex-col h-full bg-gray-50 dark:bg-gray-950 ${className}`}>
 
       {/* Chat header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b
+      <div className="flex items-center justify-between gap-3 px-3 sm:px-4 py-3 border-b
                       border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700

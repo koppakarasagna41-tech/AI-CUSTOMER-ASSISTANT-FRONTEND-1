@@ -14,18 +14,18 @@
  */
 
 import { useState } from 'react';
-import { Outlet }   from 'react-router-dom';
-import { motion }   from 'framer-motion';
+import { Outlet } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-import Navbar    from '@/components/Navbar';
-import Sidebar   from '@/components/Sidebar';
+import Navbar from '@/components/Navbar';
+import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 
 export default function MainLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex min-h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
       {/* Desktop sidebar */}
       <Sidebar />
 
@@ -45,7 +45,7 @@ export default function MainLayout() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto overflow-x-hidden"
         >
           <Outlet />
         </motion.main>

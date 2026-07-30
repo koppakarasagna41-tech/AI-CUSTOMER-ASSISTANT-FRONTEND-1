@@ -17,9 +17,12 @@ import {
   useContext,
   useReducer,
   useCallback,
+  useEffect,
 } from 'react';
 import { generateId } from '@/utils/helpers';
 import chatService from '@/services/chatService';
+import historyService from '@/services/historyService';
+import { queryRag } from '@/services/ragService';
 
 // ── State shape ──────────────────────────────────────────────
 const initialState = {
@@ -43,6 +46,9 @@ function chatReducer(state, action) {
     case 'SET_CONVERSATION_ID':
       return { ...state, conversationId: action.payload };
 
+    case 'SET_MESSAGES':
+      return { ...state, messages: action.payload };
+
     case 'UPDATE_MESSAGE_STATUS':
       return {
         ...state,
@@ -60,8 +66,37 @@ function chatReducer(state, action) {
 const ChatContext = createContext(null);
 
 // ── Provider ─────────────────────────────────────────────────
-export function ChatProvider({ children }) {
+export function ChatProvider({ children, initialConversationId = null }) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+
+  useEffect(() => {
+    if (!initialConversationId) return;
+
+    async function loadConversation() {
+      try {
+        dispatch({ type: 'SET_CONVERSATION_ID', payload: initialConversationId });
+        dispatch({ type: 'SET_MESSAGES', payload: [] });
+        dispatch({ type: 'SET_TYPING', payload: true });
+
+        const history = await historyService.getHistory(initialConversationId);
+        const messages = (history?.messages ?? []).map((message) => ({
+          id: message.id || generateId(),
+          role: message.role || 'assistant',
+          content: message.content || '',
+          timestamp: message.created_at || new Date().toISOString(),
+          status: 'delivered',
+        }));
+
+        dispatch({ type: 'SET_MESSAGES', payload: messages });
+      } catch {
+        dispatch({ type: 'SET_MESSAGES', payload: [] });
+      } finally {
+        dispatch({ type: 'SET_TYPING', payload: false });
+      }
+    }
+
+    loadConversation();
+  }, [initialConversationId]);
 
   /**
    * Send a user message and simulate an AI response.
@@ -83,22 +118,33 @@ export function ChatProvider({ children }) {
 
     try {
       let response;
+      let payload;
+      let conversationId;
+
       if (state.conversationId && state.conversationId.startsWith('conv_')) {
-        response = await chatService.sendMessage({ conversationId: state.conversationId, content: cleanedContent });
+        response = await queryRag({
+          question: cleanedContent,
+          conversation_id: state.conversationId,
+          top_k: 5,
+        });
+        payload = response?.data ?? response;
+        conversationId = payload?.conversation_id;
       } else {
-        response = await chatService.startChat({ message: cleanedContent, title: cleanedContent.slice(0, 60) });
+        response = await queryRag({ question: cleanedContent, top_k: 5 });
+        payload = response?.data ?? response;
+        conversationId = payload?.conversation_id;
       }
 
-      const payload = response?.data ?? response;
-      const conversationId = payload?.conversation_id || payload?.ai_response?.conversation_id;
       if (conversationId) {
         dispatch({ type: 'SET_CONVERSATION_ID', payload: conversationId });
       }
+
       const aiMessage = {
         id: generateId(),
         role: 'assistant',
-        content: payload?.ai_response?.content || payload?.message || 'I could not respond right now.',
-        timestamp: payload?.ai_response?.created_at || new Date().toISOString(),
+        content: payload?.answer || payload?.message || 'I could not respond right now.',
+        sources: payload?.sources || [],
+        timestamp: new Date().toISOString(),
         status: 'delivered',
       };
       dispatch({ type: 'SET_TYPING', payload: false });

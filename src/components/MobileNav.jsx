@@ -17,6 +17,7 @@ import {
   HiChatBubbleLeftRight,
   HiClipboardDocumentList,
   HiTicket,
+  HiBookOpen,
   HiChartBarSquare,
   HiCog6Tooth,
   HiSparkles,
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
   { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
   { to: ROUTES.TICKETS, label: 'Tickets', icon: HiTicket },
+  { to: ROUTES.KNOWLEDGE, label: 'Knowledge', icon: HiBookOpen },
   { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
 ];
@@ -63,7 +65,7 @@ export default function MobileNav({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col
+            className="fixed inset-y-0 left-0 z-50 w-[min(88vw,20rem)] max-w-[20rem] flex flex-col
                        bg-white dark:bg-gray-900 shadow-xl md:hidden"
             aria-label="Mobile navigation"
           >
@@ -82,7 +84,7 @@ export default function MobileNav({ isOpen, onClose }) {
                 <button
                   onClick={onClose}
                   aria-label="Close menu"
-                  className="btn-ghost p-2 rounded-lg"
+                  className="btn-ghost p-2 rounded-lg w-10 h-10"
                 >
                   <HiXMark className="w-5 h-5" />
                 </button>
@@ -98,7 +100,7 @@ export default function MobileNav({ isOpen, onClose }) {
                   end={to === '/'}
                   onClick={onClose}
                   className={({ isActive }) => `
-                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium min-h-11
                     transition-colors
                     ${isActive
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'

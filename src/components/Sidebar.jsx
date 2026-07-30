@@ -15,6 +15,7 @@ import {
   HiChatBubbleLeftRight,
   HiClipboardDocumentList,
   HiTicket,
+  HiBookOpen,
   HiChartBarSquare,
   HiCog6Tooth,
   HiSparkles,
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
   { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
   { to: ROUTES.TICKETS, label: 'Tickets', icon: HiTicket },
+  { to: ROUTES.KNOWLEDGE, label: 'Knowledge', icon: HiBookOpen },
   { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
 ];
@@ -41,7 +43,7 @@ function NavItem({ to, label, icon: Icon }) {
       end={to === '/'}
       className={({ isActive }) => `
         relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-        transition-all duration-150 group
+        transition-all duration-150 group min-h-11
         ${isActive
           ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'
@@ -72,7 +74,7 @@ export default function Sidebar() {
   const visibleNavItems = NAV_ITEMS.filter((item) => item.to !== ROUTES.ANALYTICS || isAdmin);
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0
+    <aside className="hidden md:flex flex-col w-[17rem] xl:w-64 min-h-screen sticky top-0
                       bg-white dark:bg-gray-900 border-r border-gray-200
                       dark:border-gray-700/60 shrink-0">
 

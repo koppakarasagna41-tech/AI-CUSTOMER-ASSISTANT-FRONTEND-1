@@ -94,7 +94,7 @@ export default function TicketsPage() {
     };
 
     return (
-        <div className="p-6 lg:p-8 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Tickets</h1>
@@ -102,7 +102,7 @@ export default function TicketsPage() {
                         Track support requests, monitor status, and keep your conversations moving.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Button variant="secondary" leftIcon={<HiArrowPath className="w-4 h-4" />} onClick={loadTickets}>
                         Refresh
                     </Button>
@@ -122,7 +122,7 @@ export default function TicketsPage() {
                         <button onClick={() => setShowForm(false)} className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Cancel</button>
                     </div>
 
-                    <form onSubmit={handleCreate} className="mt-6 grid gap-4 md:grid-cols-2">
+                    <form onSubmit={handleCreate} className="mt-6 grid gap-4 lg:grid-cols-2">
                         <div className="md:col-span-2">
                             <Input label="Title" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))} placeholder="Brief summary of the issue" />
                         </div>
@@ -152,7 +152,7 @@ export default function TicketsPage() {
                                 ))}
                             </select>
                         </div>
-                        <div className="md:col-span-2 flex justify-end">
+                        <div className="lg:col-span-2 flex justify-end">
                             <Button type="submit" loading={submitting}>Create ticket</Button>
                         </div>
                     </form>
@@ -180,7 +180,7 @@ export default function TicketsPage() {
                     <div className="space-y-3">
                         {visibleTickets.map((ticket) => (
                             <div key={ticket.id} className="rounded-xl border border-gray-200 p-4 dark:border-gray-700">
-                                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                                     <div className="space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <h3 className="font-semibold text-gray-900 dark:text-white">{ticket.subject}</h3>
@@ -195,7 +195,7 @@ export default function TicketsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                         {(isAdmin || user?.role === 'agent') && (
                                             <>
                                                 <select className="input min-w-[140px] py-2" value={ticket.status || 'open'} onChange={(e) => handleStatusChange(ticket, e.target.value)}>

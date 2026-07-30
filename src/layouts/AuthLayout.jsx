@@ -8,10 +8,10 @@
  */
 
 import { Outlet, Link } from 'react-router-dom';
-import { motion }       from 'framer-motion';
-import { HiSparkles }   from 'react-icons/hi2';
-import ThemeToggle      from '@/components/ui/ThemeToggle';
-import { ROUTES }       from '@/utils/constants';
+import { motion } from 'framer-motion';
+import { HiSparkles } from 'react-icons/hi2';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ROUTES } from '@/utils/constants';
 
 // Testimonials shown in the left brand panel
 const TESTIMONIALS = [
@@ -27,7 +27,7 @@ const TESTIMONIALS = [
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex bg-white dark:bg-gray-950">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white dark:bg-gray-950">
 
       {/* ── Left brand panel ────────────────────────────────── */}
       <div className="hidden lg:flex flex-col justify-between w-[480px] xl:w-[560px]
@@ -65,7 +65,7 @@ export default function AuthLayout() {
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0   }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + i * 0.15, duration: 0.4 }}
                 className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border
                            border-white/15"
@@ -84,13 +84,13 @@ export default function AuthLayout() {
       </div>
 
       {/* ── Right form panel ────────────────────────────────── */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
 
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4">
           {/* Mobile brand (only visible on small screens) */}
           <Link to={ROUTES.HOME}
-                className="lg:hidden flex items-center gap-2 font-bold
+            className="lg:hidden flex items-center gap-2 font-bold
                            text-primary-600 dark:text-primary-400">
             <div className="w-7 h-7 bg-primary-600 rounded-lg flex items-center
                             justify-center text-white text-xs font-black">AI</div>
@@ -101,10 +101,10 @@ export default function AuthLayout() {
         </div>
 
         {/* Auth form outlet — vertically centered */}
-        <div className="flex-1 flex items-center justify-center px-6 py-8">
+        <div className="flex-1 flex items-center justify-center px-4 py-6 sm:px-6 sm:py-8">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0  }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className="w-full max-w-md"
           >
