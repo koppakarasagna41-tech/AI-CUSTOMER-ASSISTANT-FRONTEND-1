@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HiArrowLeft, HiChatBubbleLeftRight, HiClock, HiExclamationTriangle } from 'react-icons/hi2';
+import { HiArrowLeft, HiChatBubbleLeftRight, HiClock, HiExclamationTriangle, HiPaperAirplane } from 'react-icons/hi2';
 
 import { useToast } from '@/context/ToastContext';
 import Button from '@/components/ui/Button';
 import Badge, { statusVariant } from '@/components/ui/Badge';
 import historyService from '@/services/historyService';
+import chatService from '@/services/chatService';
 import { ROUTES } from '@/utils/constants';
 
 function formatTimestamp(value) {
@@ -20,24 +21,26 @@ export default function ConversationDetailPage() {
     const { toast } = useToast();
     const [conversation, setConversation] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [draft, setDraft] = useState('');
+    const [sending, setSending] = useState(false);
 
-    useEffect(() => {
-        async function loadConversation() {
-            try {
-                setLoading(true);
-                const data = await historyService.getHistory(conversationId);
-                setConversation(data || null);
-            } catch (error) {
-                toast.error(error?.message || 'Unable to load conversation details.');
-            } finally {
-                setLoading(false);
-            }
-        }
+    const loadConversation = useCallback(async () => {
+        if (!conversationId) return;
 
-        if (conversationId) {
-            loadConversation();
+        try {
+            setLoading(true);
+            const data = await historyService.getHistory(conversationId);
+            setConversation(data || null);
+        } catch (error) {
+            toast.error(error?.message || 'Unable to load conversation details.');
+        } finally {
+            setLoading(false);
         }
     }, [conversationId, toast]);
+
+    useEffect(() => {
+        loadConversation();
+    }, [loadConversation]);
 
     const groupedMessages = useMemo(() => {
         const messages = conversation?.messages ?? [];
@@ -48,11 +51,33 @@ export default function ConversationDetailPage() {
         };
     }, [conversation]);
 
+    async function handleContinueChat(event) {
+        event.preventDefault();
+        const content = draft.trim();
+        if (!content || !conversationId || sending) return;
+
+        try {
+            setSending(true);
+            await chatService.sendMessage({ conversationId, content });
+            setDraft('');
+            await loadConversation();
+            toast.success('Message sent.');
+        } catch (error) {
+            toast.error(error?.message || 'Unable to send the message.');
+        } finally {
+            setSending(false);
+        }
+    }
+
     return (
         <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Button variant="secondary" leftIcon={<HiArrowLeft className="w-4 h-4" />} onClick={() => navigate(ROUTES.HISTORY)}>
+                    <Button
+                        variant="secondary"
+                        leftIcon={<HiArrowLeft className="w-4 h-4" />}
+                        onClick={() => navigate(ROUTES.HISTORY)}
+                    >
                         Back to history
                     </Button>
                     <div>
@@ -133,42 +158,63 @@ export default function ConversationDetailPage() {
                         </div>
                     </div>
 
-                    <aside className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Conversation overview</h2>
-                        <div className="mt-4 space-y-4 text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">Status</span>
-                                <Badge variant={statusVariant(conversation.status)} dot>
-                                    {conversation.status || 'open'}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">Created</span>
-                                <span className="flex items-center gap-2">
-                                    <HiClock className="w-4 h-4" />
-                                    {formatTimestamp(conversation.created_at)}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">Messages</span>
-                                <span className="flex items-center gap-2">
-                                    <HiChatBubbleLeftRight className="w-4 h-4" />
-                                    {conversation.message_count ?? conversation.messages?.length ?? 0}
-                                </span>
-                            </div>
-                            {conversation.linked_tickets?.length > 0 && (
-                                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                                        <HiExclamationTriangle className="w-4 h-4" />
-                                        <span className="font-medium">Linked tickets</span>
-                                    </div>
-                                    <ul className="mt-2 space-y-1 text-sm">
-                                        {conversation.linked_tickets.map((ticket) => (
-                                            <li key={ticket.ticket_id}>{ticket.subject}</li>
-                                        ))}
-                                    </ul>
+                    <aside className="space-y-4">
+                        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Conversation overview</h2>
+                            <div className="mt-4 space-y-4 text-sm text-gray-600 dark:text-gray-300">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-500 dark:text-gray-400">Status</span>
+                                    <Badge variant={statusVariant(conversation.status)} dot>
+                                        {conversation.status || 'open'}
+                                    </Badge>
                                 </div>
-                            )}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-500 dark:text-gray-400">Created</span>
+                                    <span className="flex items-center gap-2">
+                                        <HiClock className="w-4 h-4" />
+                                        {formatTimestamp(conversation.created_at)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-500 dark:text-gray-400">Messages</span>
+                                    <span className="flex items-center gap-2">
+                                        <HiChatBubbleLeftRight className="w-4 h-4" />
+                                        {conversation.message_count ?? conversation.messages?.length ?? 0}
+                                    </span>
+                                </div>
+                                {conversation.linked_tickets?.length > 0 && (
+                                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
+                                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                                            <HiExclamationTriangle className="w-4 h-4" />
+                                            <span className="font-medium">Linked tickets</span>
+                                        </div>
+                                        <ul className="mt-2 space-y-1 text-sm">
+                                            {conversation.linked_tickets.map((ticket) => (
+                                                <li key={ticket.ticket_id}>{ticket.subject}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Continue chatting</h2>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Send a follow-up message in the same conversation.</p>
+                            <form className="mt-4 space-y-3" onSubmit={handleContinueChat}>
+                                <textarea
+                                    rows={4}
+                                    value={draft}
+                                    onChange={(event) => setDraft(event.target.value)}
+                                    placeholder="Ask a follow-up question..."
+                                    className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                                />
+                                <div className="flex items-center justify-end">
+                                    <Button type="submit" loading={sending} leftIcon={<HiPaperAirplane className="w-4 h-4" />}>
+                                        Send message
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
                     </aside>
                 </div>
