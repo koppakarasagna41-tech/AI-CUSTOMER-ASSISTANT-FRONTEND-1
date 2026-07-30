@@ -18,7 +18,7 @@ import { useToast } from '@/context/ToastContext';
 import authService from '@/services/authService';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, USER_ROLE } from '@/utils/constants';
 import { isValidEmail, isStrongPassword } from '@/utils/helpers';
 
 // Simple strength meter
@@ -64,6 +64,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [role, setRole] = useState(USER_ROLE.CUSTOMER);
   const [errors, setErrors] = useState({});
   const [showPw, setShowPw] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -97,7 +98,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const { user, token, refreshToken } = await authService.register({
-        name: form.name.trim(), email: form.email, password: form.password,
+        name: form.name.trim(), email: form.email, password: form.password, role,
       });
       login(user, token, refreshToken);
       toast.success('Account created! Welcome aboard.');
@@ -144,6 +145,23 @@ export default function RegisterPage() {
           onChange={set('email')}
           error={errors.email}
         />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Account type
+          </label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          >
+            <option value={USER_ROLE.CUSTOMER}>Customer</option>
+            <option value={USER_ROLE.AGENT}>Agent</option>
+          </select>
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Choose customer for a normal support experience, or agent for demo staff access.
+          </p>
+        </div>
 
         <div>
           <Input

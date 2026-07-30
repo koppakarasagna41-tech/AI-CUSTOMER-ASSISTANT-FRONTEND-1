@@ -36,8 +36,11 @@ export async function login({ email, password }) {
  * Register a new account.
  * Returns { user, token }
  */
-export async function register({ name, email, password }) {
-  const response = await api.post('/auth/register', { full_name: name, email, password });
+export async function register({ name, email, password, role = null }) {
+  const payload = { full_name: name, email, password };
+  if (role) payload.role = role;
+
+  const response = await api.post('/auth/register', payload);
   const normalized = normalizeAuthResponse(response);
   if (normalized.token) {
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, normalized.token);
