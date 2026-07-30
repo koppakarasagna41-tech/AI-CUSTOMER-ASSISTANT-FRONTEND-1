@@ -16,6 +16,7 @@ export const ROUTES = {
   REGISTER: '/register',
   CHAT: '/chat',
   HISTORY: '/history',
+  CONVERSATION_DETAIL: '/history/:conversationId',
   TICKETS: '/tickets',
   ANALYTICS: '/analytics',
   SETTINGS: '/settings',

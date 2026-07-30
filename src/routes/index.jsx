@@ -34,6 +34,7 @@ import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import ChatPage from '@/pages/ChatPage';
 import HistoryPage from '@/pages/HistoryPage';
+import ConversationDetailPage from '@/pages/ConversationDetailPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import TicketsPage from '@/pages/TicketsPage';
@@ -60,6 +61,7 @@ export default function AppRoutes() {
           <Route index element={<HomePage />} />
           <Route path={ROUTES.CHAT} element={<ChatPage />} />
           <Route path={ROUTES.HISTORY} element={<HistoryPage />} />
+          <Route path={ROUTES.CONVERSATION_DETAIL} element={<ConversationDetailPage />} />
           <Route path={ROUTES.TICKETS} element={<TicketsPage />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />

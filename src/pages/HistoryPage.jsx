@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   HiMagnifyingGlass,
@@ -18,7 +19,7 @@ import {
 import { useToast } from '@/context/ToastContext';
 import Badge, { statusVariant } from '@/components/ui/Badge';
 import { timeAgo, truncate } from '@/utils/helpers';
-import { CONVERSATION_STATUS } from '@/utils/constants';
+import { CONVERSATION_STATUS, ROUTES } from '@/utils/constants';
 import chatService from '@/services/chatService';
 
 const STATUS_FILTERS = [
@@ -30,6 +31,7 @@ const STATUS_FILTERS = [
 
 export default function HistoryPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [convs, setConvs] = useState([]);
@@ -204,7 +206,7 @@ export default function HistoryPage() {
                                 transition-opacity flex-shrink-0">
                   <button
                     aria-label="Open conversation"
-                    onClick={() => toast.info('Full conversation view coming soon.')}
+                    onClick={() => navigate(ROUTES.CONVERSATION_DETAIL.replace(':conversationId', conv.id))}
                     className="btn-ghost p-1.5 rounded-lg text-gray-400
                                hover:text-primary-600 dark:hover:text-primary-400"
                   >
