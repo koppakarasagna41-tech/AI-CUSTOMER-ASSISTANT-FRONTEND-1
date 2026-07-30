@@ -5,7 +5,7 @@
  */
 
 import api from './api';
-import { STORAGE_KEYS } from '@/utils/constants';
+import { STORAGE_KEYS, USER_ROLE } from '@/utils/constants';
 
 function normalizeAuthResponse(payload) {
   const data = payload?.data ?? payload;
@@ -38,7 +38,13 @@ export async function login({ email, password }) {
  */
 export async function register({ name, email, password, role = null }) {
   const payload = { full_name: name, email, password };
-  if (role) payload.role = role;
+  const normalizedRole = role === USER_ROLE.AGENT || role === 'agent'
+    ? 'agent'
+    : role === USER_ROLE.CUSTOMER || role === 'customer'
+      ? 'customer'
+      : null;
+
+  if (normalizedRole) payload.role = normalizedRole;
 
   const response = await api.post('/auth/register', payload);
   const normalized = normalizeAuthResponse(response);
