@@ -14,6 +14,7 @@ import { createContext, useContext, useReducer, useEffect, useCallback } from 'r
 import { STORAGE_KEYS, USER_ROLE } from '@/utils/constants';
 import authService from '@/services/authService';
 import userService from '@/services/userService';
+import { setAccessToken } from '@/services/api';
 
 // ── Initial state ──────────────────────────────────────────────────
 const initialState = {
@@ -90,6 +91,7 @@ export function AuthProvider({ children }) {
           return;
         }
 
+        setAccessToken(token);
         dispatch({ type: 'HYDRATE', payload: { token, user: storedUser } });
 
         try {
@@ -100,6 +102,7 @@ export function AuthProvider({ children }) {
           }
         } catch {
           if (mounted) {
+            setAccessToken(null);
             localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
@@ -126,6 +129,7 @@ export function AuthProvider({ children }) {
    * Persists token + user to localStorage.
    */
   const login = useCallback((user, token, refreshToken = null) => {
+    setAccessToken(token);
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     if (refreshToken) {
       localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, refreshToken);
@@ -143,6 +147,7 @@ export function AuthProvider({ children }) {
     } catch {
       // Ignore backend errors and clear the client session
     } finally {
+      setAccessToken(null);
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.AUTH_USER);

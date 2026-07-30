@@ -4,7 +4,7 @@
  * All authentication-related API calls.
  */
 
-import api from './api';
+import api, { setAccessToken } from './api';
 import { STORAGE_KEYS, USER_ROLE } from '@/utils/constants';
 
 function normalizeAuthResponse(payload) {
@@ -26,6 +26,7 @@ export async function login({ email, password }) {
   const response = await api.post('/auth/login', { email, password });
   const normalized = normalizeAuthResponse(response);
   if (normalized.token) {
+    setAccessToken(normalized.token);
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, normalized.token);
     localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, normalized.refreshToken);
   }
@@ -49,6 +50,7 @@ export async function register({ name, email, password, role = null }) {
   const response = await api.post('/auth/register', payload);
   const normalized = normalizeAuthResponse(response);
   if (normalized.token) {
+    setAccessToken(normalized.token);
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, normalized.token);
     localStorage.setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, normalized.refreshToken);
   }
@@ -62,6 +64,7 @@ export async function logout() {
   try {
     await api.post('/auth/logout');
   } finally {
+    setAccessToken(null);
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.AUTH_USER);

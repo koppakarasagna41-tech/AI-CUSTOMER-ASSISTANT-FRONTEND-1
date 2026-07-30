@@ -13,6 +13,24 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '@/utils/constants';
 
+let cachedAccessToken = null;
+
+export function setAccessToken(token) {
+  cachedAccessToken = token ?? null;
+}
+
+export function getAccessToken() {
+  if (cachedAccessToken) {
+    return cachedAccessToken;
+  }
+
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+}
+
 const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com')
   .trim()
   .replace(/\/+$|\s+$/g, '');
@@ -32,6 +50,7 @@ const api = axios.create({
 });
 
 function clearAuthSession() {
+  setAccessToken(null);
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
@@ -39,7 +58,7 @@ function clearAuthSession() {
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const token = getAccessToken();
     if (token && !config.url?.includes('/auth/refresh')) {
       config.headers = {
         ...(config.headers ?? {}),
@@ -81,6 +100,7 @@ api.interceptors.response.use(
           });
           const newAccessToken = refreshResponse?.data?.data?.access_token;
           if (newAccessToken) {
+            setAccessToken(newAccessToken);
             localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newAccessToken);
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return api(originalRequest);
