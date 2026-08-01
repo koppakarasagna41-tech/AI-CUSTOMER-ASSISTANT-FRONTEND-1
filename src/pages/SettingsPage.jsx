@@ -79,8 +79,8 @@ function ProfileTab() {
       setSaved(true);
       toast.success('Profile updated successfully.');
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      toast.error('Failed to save profile.');
+    } catch (error) {
+      toast.error(error?.message || 'Failed to save profile.');
     } finally {
       setSaving(false);
     }
