@@ -36,6 +36,7 @@ export function getNavigationItems(role) {
             { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
             { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
             { to: ROUTES.CUSTOMERS, label: 'Customers', icon: HiUsers },
+            { to: ROUTES.USERS, label: 'Users', icon: HiUsers },
             { to: ROUTES.ESCALATIONS, label: 'Escalation Queue', icon: HiExclamationTriangle },
             { to: ROUTES.REPORTS, label: 'Reports', icon: HiChartBarSquare },
             { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },

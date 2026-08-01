@@ -22,6 +22,7 @@ export const ROUTES = {
   ANALYTICS: '/analytics',
   AI_SUGGESTIONS: '/ai-suggestions',
   CUSTOMERS: '/customers',
+  USERS: '/users',
   ESCALATIONS: '/escalations',
   REPORTS: '/reports',
   SETTINGS: '/settings',

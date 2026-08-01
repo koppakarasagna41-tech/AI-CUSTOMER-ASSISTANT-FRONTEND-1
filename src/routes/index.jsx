@@ -27,6 +27,7 @@ import AuthLayout from '@/layouts/AuthLayout';
 // ── Route guards ─────────────────────────────────────────────
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
+import AdminRoute from './AdminRoute';
 
 // ── Pages ─────────────────────────────────────────────────────
 import HomePage from '@/pages/HomePage';
@@ -41,6 +42,7 @@ import TicketsPage from '@/pages/TicketsPage';
 import KnowledgePage from '@/pages/KnowledgePage';
 import AISuggestionsPage from '@/pages/AISuggestionsPage';
 import CustomersPage from '@/pages/CustomersPage';
+import UsersPage from '@/pages/UsersPage';
 import EscalationPage from '@/pages/EscalationPage';
 import ReportsPage from '@/pages/ReportsPage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -72,6 +74,9 @@ export default function AppRoutes() {
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.AI_SUGGESTIONS} element={<AISuggestionsPage />} />
           <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />
+          <Route element={<AdminRoute />}>
+            <Route path={ROUTES.USERS} element={<UsersPage />} />
+          </Route>
           <Route path={ROUTES.ESCALATIONS} element={<EscalationPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
