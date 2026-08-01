@@ -26,7 +26,7 @@ export async function getUser(userId) {
 
 export async function createAgent(payload = {}) {
     try {
-        const response = await api.post('/users', {
+        const response = await api.post('/admin/agents', {
             full_name: payload.fullName,
             email: payload.email,
             password: payload.password,

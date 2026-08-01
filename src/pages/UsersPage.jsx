@@ -163,7 +163,7 @@ export default function UsersPage() {
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Agent Management</h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Administrators can create, edit, and manage agent accounts while preserving customer self-registration.</p>
                 </div>
                 <Button variant="primary" leftIcon={<HiPlus className="h-4 w-4" />} onClick={() => { setEditingUser(null); setForm(initialForm); setErrors({}); setIsModalOpen(true); }}>
@@ -175,7 +175,7 @@ export default function UsersPage() {
                 <div className="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
                         <HiUsers className="h-4 w-4" />
-                        All users
+                        Agent accounts
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">{users.length} total · {agentCount} agents</div>
                 </div>
@@ -252,6 +252,12 @@ export default function UsersPage() {
                             {!editingUser && (
                                 <Input label="Temporary Password" type="text" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} error={errors.password} />
                             )}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300">
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="font-medium">Active / Inactive</span>
+                                    <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">{editingUser?.is_active ?? true ? 'Active' : 'Inactive'}</span>
+                                </div>
+                            </div>
                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300">
                                 <div className="flex items-center gap-2 font-medium">
                                     <HiUsers className="h-4 w-4 text-primary-600" />
