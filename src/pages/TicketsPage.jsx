@@ -21,6 +21,7 @@ import Input from '@/components/ui/Input';
 import ticketService from '@/services/ticketService';
 import chatService from '@/services/chatService';
 import useDebounce from '@/hooks/useDebounce';
+import { ROUTES } from '@/utils/constants';
 
 const CATEGORY_OPTIONS = ['technical', 'billing', 'refund', 'account', 'general_inquiry', 'complaint', 'feature_request'];
 const PRIORITY_OPTIONS = ['low', 'medium', 'high', 'critical'];
@@ -161,6 +162,21 @@ export default function TicketsPage() {
                     <Button leftIcon={<HiPlus className="w-4 h-4" />} onClick={() => setShowForm(true)}>
                         Create Ticket
                     </Button>
+                </div>
+            </div>
+
+            <div className="rounded-2xl border border-primary-100 bg-primary-50/70 p-4 text-sm text-primary-900 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-200">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="font-semibold">Quick help is always available.</p>
+                        <p className="mt-1 text-sm text-primary-800/80 dark:text-primary-200/80">Start a chat for quick questions, or create a ticket if the issue needs a tracked follow-up.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="secondary" leftIcon={<HiChatBubbleLeftRight className="w-4 h-4" />} onClick={() => navigate(ROUTES.CHAT)}>
+                            Open chat
+                        </Button>
+                        <Button onClick={() => setShowForm(true)}>Create ticket</Button>
+                    </div>
                 </div>
             </div>
 

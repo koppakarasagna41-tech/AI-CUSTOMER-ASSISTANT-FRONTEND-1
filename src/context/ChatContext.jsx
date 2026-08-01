@@ -193,6 +193,12 @@ export function ChatProvider({ children, initialConversationId = null }) {
     }
   }, [state.conversationId]);
 
+  const retryLastMessage = useCallback(async () => {
+    const lastUserMessage = [...state.messages].reverse().find((message) => message.role === 'user');
+    if (!lastUserMessage?.content) return;
+    await sendMessage(lastUserMessage.content);
+  }, [sendMessage, state.messages]);
+
   const clearConversation = useCallback(() => {
     dispatch({ type: 'CLEAR' });
   }, []);
@@ -200,6 +206,7 @@ export function ChatProvider({ children, initialConversationId = null }) {
   const value = {
     ...state,
     sendMessage,
+    retryLastMessage,
     clearConversation,
   };
 

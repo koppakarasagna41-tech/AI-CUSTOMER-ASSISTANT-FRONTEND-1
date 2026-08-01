@@ -12,7 +12,7 @@
 import { useRef, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { HiSparkles, HiArrowPath, HiTicket, HiChatBubbleLeftRight, HiArrowRight } from 'react-icons/hi2';
+import { HiSparkles, HiArrowPath, HiTicket, HiChatBubbleLeftRight, HiArrowRight, HiExclamationTriangle } from 'react-icons/hi2';
 
 import { useChat } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
@@ -67,7 +67,7 @@ function EmptyState() {
 }
 
 export default function ChatWindow({ className = '' }) {
-  const { messages, isTyping, sendMessage, clearConversation, conversationTitle } = useChat();
+  const { messages, isTyping, sendMessage, retryLastMessage, clearConversation, conversationTitle } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
   const bottomRef = useRef(null);
@@ -80,6 +80,10 @@ export default function ChatWindow({ className = '' }) {
 
   const latestAssistantMessage = useMemo(() => {
     return [...messages].reverse().find((message) => message.role === 'assistant');
+  }, [messages]);
+
+  const latestUserMessage = useMemo(() => {
+    return [...messages].reverse().find((message) => message.role === 'user');
   }, [messages]);
 
   const lowConfidence = !dismissedLowConfidence
@@ -141,6 +145,27 @@ export default function ChatWindow({ className = '' }) {
             <AnimatePresence>
               {isTyping && <TypingIndicator />}
             </AnimatePresence>
+
+            {!isTyping && latestAssistantMessage?.status === 'error' && (
+              <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-rose-900 shadow-sm dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="font-semibold">The assistant hit a snag.</p>
+                    <p className="mt-1 text-sm text-rose-800 dark:text-rose-200/80">
+                      You can retry your last message or start a fresh conversation if you want a new direction.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="secondary" size="sm" leftIcon={<HiExclamationTriangle className="w-4 h-4" />} onClick={retryLastMessage}>
+                      Retry
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={clearConversation}>
+                      New chat
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {!isTyping && suggestedQuestions.length > 0 && (
               <div className="mb-4 flex flex-wrap gap-2">

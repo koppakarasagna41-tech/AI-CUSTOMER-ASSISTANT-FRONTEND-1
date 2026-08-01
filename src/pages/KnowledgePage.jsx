@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     HiDocumentText,
@@ -22,6 +23,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import knowledgeService from '@/services/knowledgeService';
+import { ROUTES } from '@/utils/constants';
 
 const statusStyles = {
     completed: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
@@ -48,6 +50,7 @@ function StatusBadge({ status }) {
 export default function KnowledgePage() {
     const { isAdmin } = useAuth();
     const { toast } = useToast();
+    const navigate = useNavigate();
     const [documents, setDocuments] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -90,6 +93,16 @@ export default function KnowledgePage() {
             return matchesSearch && matchesCategory;
         });
     }, [documents, search, category]);
+
+    const summaryStats = useMemo(() => {
+        const completed = documents.filter((doc) => (doc.status || '').toLowerCase() === 'completed').length;
+        const processing = documents.filter((doc) => ['processing', 'pending'].includes((doc.status || '').toLowerCase())).length;
+        return [
+            { label: 'Documents', value: documents.length },
+            { label: 'Ready for RAG', value: completed },
+            { label: 'In progress', value: processing },
+        ];
+    }, [documents]);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -136,9 +149,36 @@ export default function KnowledgePage() {
                     <HiDocumentText className="w-4 h-4" />
                     Knowledge Base
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Upload and manage knowledge for RAG</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Add PDFs, docs, and text files so the assistant can answer questions from your indexed content.</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customer knowledge center</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Browse the resources that power the AI assistant and continue the conversation when you need a human follow-up.</p>
             </motion.div>
+
+            <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card p-5 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                        <HiDocumentText className="w-4 h-4 text-primary-600" />
+                        Search the knowledge base
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Use the filters below to find helpful articles, policies, and FAQs that the assistant can draw from.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        <Link to={ROUTES.CHAT} className="btn-primary">Ask the assistant</Link>
+                        <button type="button" onClick={() => navigate(ROUTES.TICKETS)} className="btn-secondary">Create a ticket</button>
+                    </div>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card p-5">
+                    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                        {summaryStats.map((stat) => (
+                            <div key={stat.label} className="rounded-2xl bg-gray-50 p-3 dark:bg-gray-800/70">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{stat.label}</p>
+                                <p className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{stat.value}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            </div>
 
             {isAdmin ? (
                 <motion.form onSubmit={handleSubmit} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card p-5 space-y-4">

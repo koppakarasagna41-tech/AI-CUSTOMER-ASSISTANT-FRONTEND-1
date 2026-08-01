@@ -4,7 +4,7 @@
  * Server-backed conversation history with search, filters, and pagination.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -78,60 +78,53 @@ export default function HistoryPage() {
     hasNext: page < Math.max(1, Math.ceil(total / pageSize)),
   }), [page, pageSize, total]);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadHistory = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [sortBy, sortOrder] = sortValue.split(':');
+      const response = await historyService.listHistory({
+        page,
+        page_size: pageSize,
+        search: debouncedSearch.trim() || undefined,
+        status: statusFilter || undefined,
+        sentiment: sentimentFilter || undefined,
+        has_tickets: ticketFilter === '' ? undefined : ticketFilter === 'true',
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      });
 
-    async function loadHistory() {
-      try {
-        setLoading(true);
-        const [sortBy, sortOrder] = sortValue.split(':');
-        const response = await historyService.listHistory({
-          page,
-          page_size: pageSize,
-          search: debouncedSearch.trim() || undefined,
-          status: statusFilter || undefined,
-          sentiment: sentimentFilter || undefined,
-          has_tickets: ticketFilter === '' ? undefined : ticketFilter === 'true',
-          sort_by: sortBy,
-          sort_order: sortOrder,
-        });
+      const items = (response?.items ?? []).map((conversation) => ({
+        id: conversation.id || conversation.conversation_id,
+        conversationId: conversation.conversation_id || conversation.id,
+        title: conversation.title || conversation.summary || 'Untitled conversation',
+        preview: conversation.latest_message_preview || conversation.preview || conversation.title || 'No preview available',
+        status: conversation.status || 'open',
+        sentiment: conversation.sentiment || conversation.dominant_sentiment || '',
+        tags: conversation.tags || [],
+        updatedAt: conversation.updated_at || conversation.created_at,
+        createdAt: conversation.created_at,
+        messages: conversation.message_count ?? conversation.messages_total ?? 0,
+        hasTickets: Boolean(conversation.has_tickets || (conversation.linked_tickets?.length ?? 0) > 0),
+      }));
 
-        if (!mounted) return;
-
-        const items = (response?.items ?? []).map((conversation) => ({
-          id: conversation.id || conversation.conversation_id,
-          conversationId: conversation.conversation_id || conversation.id,
-          title: conversation.title || conversation.summary || 'Untitled conversation',
-          preview: conversation.latest_message_preview || conversation.preview || conversation.title || 'No preview available',
-          status: conversation.status || 'open',
-          sentiment: conversation.sentiment || conversation.dominant_sentiment || '',
-          tags: conversation.tags || [],
-          updatedAt: conversation.updated_at || conversation.created_at,
-          createdAt: conversation.created_at,
-          messages: conversation.message_count ?? conversation.messages_total ?? 0,
-          hasTickets: Boolean(conversation.has_tickets || (conversation.linked_tickets?.length ?? 0) > 0),
-        }));
-
-        setRecords(items);
-        setTotal(response?.total ?? 0);
-      } catch (err) {
-        toast.error(err.message || 'Unable to load conversations.');
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
+      setRecords(items);
+      setTotal(response?.total ?? 0);
+    } catch (err) {
+      toast.error(err.message || 'Unable to load conversations.');
+    } finally {
+      setLoading(false);
     }
-
-    loadHistory();
-    return () => {
-      mounted = false;
-    };
   }, [debouncedSearch, page, pageSize, statusFilter, sentimentFilter, ticketFilter, sortValue, toast]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   async function handleDelete(id) {
     try {
       await chatService.deleteConversation(id);
+      setRecords((current) => current.filter((conversation) => conversation.conversationId !== id && conversation.id !== id));
+      setTotal((current) => Math.max(0, current - 1));
       toast.success('Conversation deleted.');
       setPage(1);
     } catch (err) {
