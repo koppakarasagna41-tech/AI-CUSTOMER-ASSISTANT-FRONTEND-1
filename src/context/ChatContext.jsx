@@ -24,11 +24,22 @@ import chatService from '@/services/chatService';
 import historyService from '@/services/historyService';
 import { queryRag } from '@/services/ragService';
 
+function generateConversationTitle(text = '') {
+  return text
+    .trim()
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .slice(0, 6)
+    .join(' ')
+    .replace(/[^\w\s\-'.?]/g, '') || 'New conversation';
+}
+
 // ── State shape ──────────────────────────────────────────────
 const initialState = {
   messages: [],   // [{ id, role:'user'|'assistant', content, timestamp, status }]
   isTyping: false,
   conversationId: generateId(),
+  conversationTitle: 'New conversation',
 };
 
 // ── Reducer ──────────────────────────────────────────────────
@@ -41,10 +52,13 @@ function chatReducer(state, action) {
       return { ...state, isTyping: action.payload };
 
     case 'CLEAR':
-      return { ...initialState, conversationId: generateId() };
+      return { ...initialState, conversationId: generateId(), conversationTitle: 'New conversation' };
 
     case 'SET_CONVERSATION_ID':
       return { ...state, conversationId: action.payload };
+
+    case 'SET_CONVERSATION_TITLE':
+      return { ...state, conversationTitle: action.payload || 'New conversation' };
 
     case 'SET_MESSAGES':
       return { ...state, messages: action.payload };
@@ -85,8 +99,13 @@ export function ChatProvider({ children, initialConversationId = null }) {
           content: message.content || '',
           timestamp: message.created_at || new Date().toISOString(),
           status: 'delivered',
+          confidence: message.confidence ?? message.confidence_score ?? null,
+          provider: message.provider || message.model || message.model_used || null,
+          sources: message.sources || message.citations || [],
+          suggestedQuestions: message.suggested_questions || message.follow_up_questions || [],
         }));
 
+        dispatch({ type: 'SET_CONVERSATION_TITLE', payload: history?.title || history?.conversation_title || null });
         dispatch({ type: 'SET_MESSAGES', payload: messages });
       } catch {
         dispatch({ type: 'SET_MESSAGES', payload: [] });
@@ -139,11 +158,17 @@ export function ChatProvider({ children, initialConversationId = null }) {
         dispatch({ type: 'SET_CONVERSATION_ID', payload: conversationId });
       }
 
+      const generatedTitle = payload?.title || payload?.conversation_title || generateConversationTitle(cleanedContent);
+      dispatch({ type: 'SET_CONVERSATION_TITLE', payload: generatedTitle });
+
       const aiMessage = {
         id: generateId(),
         role: 'assistant',
         content: payload?.answer || payload?.message || 'I could not respond right now.',
         sources: payload?.sources || [],
+        confidence: payload?.confidence ?? payload?.confidence_score ?? payload?.confidenceLevel ?? null,
+        provider: payload?.provider || payload?.model || payload?.model_used || payload?.ai_provider || null,
+        suggestedQuestions: payload?.suggested_questions || payload?.follow_up_questions || [],
         timestamp: new Date().toISOString(),
         status: 'delivered',
       };

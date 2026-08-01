@@ -8,33 +8,15 @@
  * add a new route here and it appears automatically.
  */
 
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  HiHome,
-  HiChatBubbleLeftRight,
-  HiClipboardDocumentList,
-  HiTicket,
-  HiBookOpen,
-  HiChartBarSquare,
-  HiCog6Tooth,
-  HiSparkles,
-} from 'react-icons/hi2';
+import { HiSparkles } from 'react-icons/hi2';
 
 import { ROUTES } from '@/utils/constants';
+import { getNavigationItems, isStaffRole } from '@/utils/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import Avatar from '@/components/ui/Avatar';
-
-// ── Navigation items ─────────────────────────────────────────
-const NAV_ITEMS = [
-  { to: ROUTES.HOME, label: 'Home', icon: HiHome },
-  { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
-  { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
-  { to: ROUTES.TICKETS, label: 'Tickets', icon: HiTicket },
-  { to: ROUTES.KNOWLEDGE, label: 'Knowledge', icon: HiBookOpen },
-  { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
-  { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
-];
 
 function NavItem({ to, label, icon: Icon }) {
   return (
@@ -70,8 +52,17 @@ function NavItem({ to, label, icon: Icon }) {
 }
 
 export default function Sidebar() {
-  const { isAdmin, user } = useAuth();
-  const visibleNavItems = NAV_ITEMS.filter((item) => item.to !== ROUTES.ANALYTICS || isAdmin);
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const visibleNavItems = getNavigationItems(user?.role);
+  const staffMode = isStaffRole(user?.role);
+
+  function handleLogout() {
+    logout();
+    toast.success('You have been signed out.');
+    navigate(ROUTES.LOGIN);
+  }
 
   return (
     <aside className="hidden md:flex flex-col w-[17rem] xl:w-64 min-h-screen sticky top-0
@@ -87,7 +78,9 @@ export default function Sidebar() {
         </div>
         <div className="leading-none">
           <p className="font-bold text-gray-900 dark:text-white text-sm">AI Support</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">Customer Assistant</p>
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            {staffMode ? 'Agent Workspace' : 'Customer Assistant'}
+          </p>
         </div>
       </div>
 
@@ -100,8 +93,12 @@ export default function Sidebar() {
 
       {/* User footer */}
       <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-700/60">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                        hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+                     hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+        >
           <Avatar src={user?.avatar} name={user?.name} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">
@@ -109,7 +106,10 @@ export default function Sidebar() {
             </p>
             <p className="text-xs text-gray-400 truncate">{user?.email ?? ''}</p>
           </div>
-        </div>
+          <span className="text-xs font-medium text-red-600 dark:text-red-400">
+            Logout
+          </span>
+        </button>
       </div>
     </aside>
   );

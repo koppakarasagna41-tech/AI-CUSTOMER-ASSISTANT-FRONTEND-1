@@ -31,14 +31,21 @@ export function getAccessToken() {
   return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 }
 
-const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com')
+const remoteBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://ai-customer-assistant-backend-1.onrender.com')
   .trim()
   .replace(/\/+$|\s+$/g, '');
-const baseURL = envBaseUrl.endsWith('/api/v1')
-  ? envBaseUrl
-  : envBaseUrl.endsWith('/api')
-    ? `${envBaseUrl}/v1`
-    : `${envBaseUrl}/api/v1`;
+const normalizedRemoteBaseUrl = remoteBaseUrl.endsWith('/api/v1')
+  ? remoteBaseUrl
+  : remoteBaseUrl.endsWith('/api')
+    ? `${remoteBaseUrl}/v1`
+    : `${remoteBaseUrl}/api/v1`;
+
+const isLocalDevHost = typeof window !== 'undefined'
+  && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+const baseURL = import.meta.env.DEV && isLocalDevHost
+  ? '/api/v1'
+  : normalizedRemoteBaseUrl;
 
 const api = axios.create({
   baseURL,
@@ -54,6 +61,25 @@ function clearAuthSession() {
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+}
+
+function getBackendErrorMessage(error, fallbackMessage) {
+  const responseData = error.response?.data;
+  const validationDetails = responseData?.details;
+
+  if (Array.isArray(validationDetails) && validationDetails.length > 0) {
+    const validationMessages = validationDetails
+      .map((item) => item?.message)
+      .filter(Boolean);
+    if (validationMessages.length > 0) {
+      return validationMessages.join(' ');
+    }
+  }
+
+  return responseData?.message
+    || responseData?.detail
+    || responseData?.error?.message
+    || fallbackMessage;
 }
 
 api.interceptors.request.use(
@@ -78,10 +104,12 @@ api.interceptors.response.use(
     const isTimeout = error.code === 'ECONNABORTED' && error.message?.includes('timeout');
     const message = isTimeout
       ? 'The request timed out. Please try again in a moment.'
-      : error.response?.data?.message
-      || error.response?.data?.detail
-      || error.message
-      || 'An unexpected error occurred.';
+      : getBackendErrorMessage(
+        error,
+        error.response
+          ? 'An unexpected error occurred.'
+          : 'Unable to reach the API. Check the backend status and CORS settings.'
+      );
 
     if (status === 403) {
       if (typeof window !== 'undefined' && window.location.pathname !== '/') {

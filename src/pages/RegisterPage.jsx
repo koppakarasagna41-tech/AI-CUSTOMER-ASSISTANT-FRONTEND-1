@@ -18,6 +18,7 @@ import { useToast } from '@/context/ToastContext';
 import authService from '@/services/authService';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
 import { ROUTES, USER_ROLE } from '@/utils/constants';
 import { isValidEmail, isStrongPassword } from '@/utils/helpers';
 
@@ -105,7 +106,15 @@ export default function RegisterPage() {
       toast.success('Account created! Welcome aboard.');
       navigate(ROUTES.HOME, { replace: true });
     } catch (err) {
-      toast.error(err.message || 'Registration failed. Please try again.');
+      const roleValidationDetails = err?.raw?.response?.data?.details;
+      const roleRejected = Array.isArray(roleValidationDetails)
+        && roleValidationDetails.some((detail) => String(detail?.field || '').includes('role'));
+
+      if (accountType === USER_ROLE.AGENT && roleRejected) {
+        toast.error('Agent accounts must be created by an administrator.');
+      } else {
+        toast.error(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -150,6 +159,9 @@ export default function RegisterPage() {
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Account type
+            <Badge variant="yellow" dot className="ml-2 align-middle">
+              Admin-managed for agents
+            </Badge>
           </label>
           <select
             value={accountType}
@@ -157,10 +169,10 @@ export default function RegisterPage() {
             className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           >
             <option value={USER_ROLE.CUSTOMER}>Customer</option>
-            <option value={USER_ROLE.AGENT}>Agent</option>
+            <option value={USER_ROLE.AGENT}>Agent - admin managed</option>
           </select>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Choose customer for a normal support experience, or agent for demo staff access.
+            Customer accounts can self-register. Agent accounts must be created by an administrator.
           </p>
         </div>
 

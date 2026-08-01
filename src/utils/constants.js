@@ -20,6 +20,10 @@ export const ROUTES = {
   TICKETS: '/tickets',
   KNOWLEDGE: '/knowledge',
   ANALYTICS: '/analytics',
+  AI_SUGGESTIONS: '/ai-suggestions',
+  CUSTOMERS: '/customers',
+  ESCALATIONS: '/escalations',
+  REPORTS: '/reports',
   SETTINGS: '/settings',
   NOT_FOUND: '*',
 };

@@ -9,38 +9,33 @@
  *  - onClose  : () => void
  */
 
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiXMark,
-  HiHome,
-  HiChatBubbleLeftRight,
-  HiClipboardDocumentList,
-  HiTicket,
-  HiBookOpen,
-  HiChartBarSquare,
-  HiCog6Tooth,
   HiSparkles,
 } from 'react-icons/hi2';
 
 import { ROUTES } from '@/utils/constants';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import Avatar from '@/components/ui/Avatar';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-
-const NAV_ITEMS = [
-  { to: ROUTES.HOME, label: 'Home', icon: HiHome },
-  { to: ROUTES.CHAT, label: 'AI Chat', icon: HiChatBubbleLeftRight },
-  { to: ROUTES.HISTORY, label: 'History', icon: HiClipboardDocumentList },
-  { to: ROUTES.TICKETS, label: 'Tickets', icon: HiTicket },
-  { to: ROUTES.KNOWLEDGE, label: 'Knowledge', icon: HiBookOpen },
-  { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
-  { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
-];
+import { getNavigationItems, isStaffRole } from '@/utils/navigation';
 
 export default function MobileNav({ isOpen, onClose }) {
-  const { isAdmin, user } = useAuth();
-  const visibleNavItems = NAV_ITEMS.filter((item) => item.to !== ROUTES.ANALYTICS || isAdmin);
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const visibleNavItems = getNavigationItems(user?.role);
+  const staffMode = isStaffRole(user?.role);
+
+  function handleLogout() {
+    logout();
+    toast.success('You have been signed out.');
+    onClose();
+    navigate(ROUTES.LOGIN);
+  }
 
   return (
     <AnimatePresence>
@@ -77,7 +72,12 @@ export default function MobileNav({ isOpen, onClose }) {
                                 rounded-xl flex items-center justify-center">
                   <HiSparkles className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-gray-900 dark:text-white">AI Support</span>
+                <div>
+                  <span className="block font-bold text-gray-900 dark:text-white">AI Support</span>
+                  <span className="block text-[10px] text-gray-400">
+                    {staffMode ? 'Agent Workspace' : 'Customer Assistant'}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center gap-1">
                 <ThemeToggle />
@@ -115,7 +115,7 @@ export default function MobileNav({ isOpen, onClose }) {
             </nav>
 
             {/* User footer */}
-            <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
               <div className="flex items-center gap-3">
                 <Avatar src={user?.avatar} name={user?.name} size="sm" />
                 <div className="flex-1 min-w-0">
@@ -125,6 +125,14 @@ export default function MobileNav({ isOpen, onClose }) {
                   <p className="text-xs text-gray-400 truncate">{user?.email ?? ''}</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full btn-secondary justify-center"
+              >
+                Sign out
+              </button>
             </div>
           </motion.aside>
         </>
