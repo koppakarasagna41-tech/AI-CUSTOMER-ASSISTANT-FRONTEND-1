@@ -23,7 +23,7 @@ import { formatCount, timeAgo } from '@/utils/helpers';
 import { ROUTES, USER_ROLE } from '@/utils/constants';
 
 export default function CustomersPage() {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const { toast } = useToast();
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
@@ -36,6 +36,10 @@ export default function CustomersPage() {
     const [detailLoading, setDetailLoading] = useState(false);
 
     useEffect(() => {
+        if (!isAdmin) {
+            return;
+        }
+
         let mounted = true;
 
         async function loadUsers() {
@@ -59,7 +63,7 @@ export default function CustomersPage() {
         return () => {
             mounted = false;
         };
-    }, [toast]);
+    }, [toast, isAdmin]);
 
     const visibleUsers = useMemo(() => {
         const query = search.trim().toLowerCase();
@@ -91,6 +95,16 @@ export default function CustomersPage() {
     }
 
     const totalCustomers = users.filter((item) => item.role === USER_ROLE.CUSTOMER).length;
+
+    if (!isAdmin) {
+        return (
+            <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+                <div className="card p-6 text-sm text-gray-600 dark:text-gray-300">
+                    Customer management is available to administrators only.
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">

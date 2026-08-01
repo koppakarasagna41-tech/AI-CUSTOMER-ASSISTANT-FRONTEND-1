@@ -28,17 +28,25 @@ export function getNavigationItems(role) {
         { to: ROUTES.SETTINGS, label: 'Profile / Settings', icon: HiCog6Tooth },
     ];
 
-    if (isStaffRole(role)) {
+    if (role === USER_ROLE.ADMIN) {
+        return [
+            { to: ROUTES.ADMIN_DASHBOARD, label: 'Admin Dashboard', icon: HiHome },
+            { to: ROUTES.USERS, label: 'Manage Users', icon: HiUsers },
+            { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
+            { to: ROUTES.CUSTOMERS, label: 'Customers', icon: HiUsers },
+            { to: ROUTES.ESCALATIONS, label: 'Escalation Queue', icon: HiExclamationTriangle },
+            { to: ROUTES.REPORTS, label: 'Reports', icon: HiChartBarSquare },
+            { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
+            { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
+        ];
+    }
+
+    if (role === USER_ROLE.AGENT) {
         return [
             { to: ROUTES.HOME, label: 'Agent Dashboard', icon: HiHome },
             { to: ROUTES.TICKETS, label: 'Incoming Tickets', icon: HiTicket },
             { to: ROUTES.AI_SUGGESTIONS, label: 'AI Suggestions', icon: HiSparkles },
             { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
-            { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
-            { to: ROUTES.CUSTOMERS, label: 'Customers', icon: HiUsers },
-            { to: ROUTES.USERS, label: 'Users', icon: HiUsers },
-            { to: ROUTES.ESCALATIONS, label: 'Escalation Queue', icon: HiExclamationTriangle },
-            { to: ROUTES.REPORTS, label: 'Reports', icon: HiChartBarSquare },
             { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
         ];
     }

@@ -16,7 +16,7 @@ import {
   HiSparkles,
 } from 'react-icons/hi2';
 
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, USER_ROLE } from '@/utils/constants';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Avatar from '@/components/ui/Avatar';
@@ -29,6 +29,11 @@ export default function MobileNav({ isOpen, onClose }) {
   const navigate = useNavigate();
   const visibleNavItems = getNavigationItems(user?.role);
   const staffMode = isStaffRole(user?.role);
+  const workspaceLabel = user?.role === USER_ROLE.ADMIN
+    ? 'Admin Workspace'
+    : staffMode
+      ? 'Agent Workspace'
+      : 'Customer Assistant';
 
   function handleLogout() {
     logout();
@@ -75,7 +80,7 @@ export default function MobileNav({ isOpen, onClose }) {
                 <div>
                   <span className="block font-bold text-gray-900 dark:text-white">AI Support</span>
                   <span className="block text-[10px] text-gray-400">
-                    {staffMode ? 'Agent Workspace' : 'Customer Assistant'}
+                    {workspaceLabel}
                   </span>
                 </div>
               </div>

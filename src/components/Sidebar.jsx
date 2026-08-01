@@ -12,7 +12,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HiSparkles } from 'react-icons/hi2';
 
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, USER_ROLE } from '@/utils/constants';
 import { getNavigationItems, isStaffRole } from '@/utils/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -57,6 +57,11 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const visibleNavItems = getNavigationItems(user?.role);
   const staffMode = isStaffRole(user?.role);
+  const workspaceLabel = user?.role === USER_ROLE.ADMIN
+    ? 'Admin Workspace'
+    : staffMode
+      ? 'Agent Workspace'
+      : 'Customer Assistant';
 
   function handleLogout() {
     logout();
@@ -79,7 +84,7 @@ export default function Sidebar() {
         <div className="leading-none">
           <p className="font-bold text-gray-900 dark:text-white text-sm">AI Support</p>
           <p className="text-[10px] text-gray-400 mt-0.5">
-            {staffMode ? 'Agent Workspace' : 'Customer Assistant'}
+            {workspaceLabel}
           </p>
         </div>
       </div>

@@ -86,7 +86,7 @@ const STAFF_KPI_CONFIG = [
 ];
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const staffMode = isStaffRole(user?.role);
   const [loading, setLoading] = useState(true);
@@ -264,9 +264,11 @@ export default function HomePage() {
               <Link to={ROUTES.TICKETS} className="btn-primary">
                 Incoming Tickets
               </Link>
-              <Link to={ROUTES.ANALYTICS} className="btn-secondary">
-                Open Analytics
-              </Link>
+              {isAdmin ? (
+                <Link to={ROUTES.ANALYTICS} className="btn-secondary">
+                  Open Analytics
+                </Link>
+              ) : null}
             </div>
           </div>
         </motion.div>

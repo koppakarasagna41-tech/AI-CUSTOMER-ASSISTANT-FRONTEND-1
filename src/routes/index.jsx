@@ -73,11 +73,7 @@ export default function AppRoutes() {
           <Route path={ROUTES.CONVERSATION_DETAIL} element={<ConversationDetailPage />} />
           <Route path={ROUTES.TICKETS} element={<TicketsPage />} />
           <Route path={ROUTES.KNOWLEDGE} element={<KnowledgePage />} />
-          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.AI_SUGGESTIONS} element={<AISuggestionsPage />} />
-          <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />
-          <Route path={ROUTES.ESCALATIONS} element={<EscalationPage />} />
-          <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>
 
@@ -86,6 +82,10 @@ export default function AppRoutes() {
             <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
             <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
             <Route path={ROUTES.USERS} element={<UsersPage />} />
+            <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+            <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />
+            <Route path={ROUTES.ESCALATIONS} element={<EscalationPage />} />
+            <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           </Route>
         </Route>
       </Route>
