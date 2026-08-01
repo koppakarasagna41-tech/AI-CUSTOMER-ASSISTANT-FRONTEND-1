@@ -31,25 +31,28 @@ export function getNavigationItems(role) {
 
     if (role === USER_ROLE.ADMIN) {
         return [
-            { to: ROUTES.ADMIN_DASHBOARD, label: 'Admin Dashboard', icon: HiHome },
+            { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: HiHome },
+            { to: ROUTES.USERS, label: 'Users', icon: HiUsers },
             { to: ROUTES.AGENTS, label: 'Agents', icon: HiUserGroup },
-            { to: ROUTES.USERS, label: 'Manage Users', icon: HiUsers },
-            { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
-            { to: ROUTES.CUSTOMERS, label: 'Customers', icon: HiUsers },
-            { to: ROUTES.ESCALATIONS, label: 'Escalation Queue', icon: HiExclamationTriangle },
-            { to: ROUTES.REPORTS, label: 'Reports', icon: HiChartBarSquare },
-            { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
-            { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
+            { to: ROUTES.ADMIN_KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
+            { to: ROUTES.ADMIN_ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
+            { to: ROUTES.ADMIN_REPORTS, label: 'Reports', icon: HiChartBarSquare },
+            { to: ROUTES.ADMIN_SETTINGS, label: 'Settings', icon: HiCog6Tooth },
         ];
     }
 
     if (role === USER_ROLE.AGENT) {
         return [
-            { to: ROUTES.HOME, label: 'Agent Dashboard', icon: HiHome },
-            { to: ROUTES.TICKETS, label: 'Incoming Tickets', icon: HiTicket },
+            { to: ROUTES.AGENT_DASHBOARD, label: 'Dashboard', icon: HiHome },
+            { to: ROUTES.AGENT_TICKETS, label: 'Incoming Tickets', icon: HiTicket },
+            { to: ROUTES.AGENT_ASSIGNED_TICKETS, label: 'Assigned Tickets', icon: HiUsers },
+            { to: ROUTES.AGENT_HISTORY, label: 'Customer History', icon: HiClipboardDocumentList },
             { to: ROUTES.AI_SUGGESTIONS, label: 'AI Suggestions', icon: HiSparkles },
-            { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
-            { to: ROUTES.SETTINGS, label: 'Settings', icon: HiCog6Tooth },
+            { to: ROUTES.AGENT_ESCALATIONS, label: 'Escalation Queue', icon: HiExclamationTriangle },
+            { to: ROUTES.AGENT_KNOWLEDGE, label: 'Knowledge Base', icon: HiBookOpen },
+            { to: ROUTES.AGENT_ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
+            { to: ROUTES.AGENT_REPORTS, label: 'Reports', icon: HiChartBarSquare },
+            { to: ROUTES.AGENT_SETTINGS, label: 'Settings', icon: HiCog6Tooth },
         ];
     }
 

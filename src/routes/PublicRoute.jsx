@@ -7,12 +7,12 @@
  */
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth }    from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { ROUTES }     from '@/utils/constants';
+import { ROUTES, USER_ROLE } from '@/utils/constants';
 
 export default function PublicRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -20,8 +20,13 @@ export default function PublicRoute() {
   }
 
   if (isAuthenticated) {
-    // Redirect to where they were going before, or fall back to home
-    const destination = location.state?.from?.pathname || ROUTES.HOME;
+    const destination =
+      location.state?.from?.pathname ||
+      (user?.role === USER_ROLE.ADMIN
+        ? ROUTES.ADMIN_DASHBOARD
+        : user?.role === USER_ROLE.AGENT
+          ? ROUTES.AGENT_DASHBOARD
+          : ROUTES.DASHBOARD);
     return <Navigate to={destination} replace />;
   }
 

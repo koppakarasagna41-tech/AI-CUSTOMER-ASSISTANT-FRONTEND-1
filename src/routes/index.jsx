@@ -29,6 +29,7 @@ import AuthLayout from '@/layouts/AuthLayout';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import AdminRoute from './AdminRoute';
+import AgentRoute from './AgentRoute';
 
 // ── Pages ─────────────────────────────────────────────────────
 import HomePage from '@/pages/HomePage';
@@ -61,6 +62,8 @@ export default function AppRoutes() {
       <Route element={<PublicRoute />}>
         <Route element={<AuthLayout />}>
           <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Route path={ROUTES.ADMIN_LOGIN} element={<LoginPage />} />
+          <Route path={ROUTES.AGENT_LOGIN} element={<LoginPage />} />
           <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
         </Route>
       </Route>
@@ -78,16 +81,33 @@ export default function AppRoutes() {
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>
 
+        <Route element={<AgentRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path={ROUTES.AGENT_DASHBOARD} element={<HomePage />} />
+            <Route path={ROUTES.AGENT_TICKETS} element={<TicketsPage />} />
+            <Route path={ROUTES.AGENT_ASSIGNED_TICKETS} element={<TicketsPage />} />
+            <Route path={ROUTES.AGENT_HISTORY} element={<HistoryPage />} />
+            <Route path={ROUTES.AGENT_KNOWLEDGE} element={<KnowledgePage />} />
+            <Route path={ROUTES.AI_SUGGESTIONS} element={<AISuggestionsPage />} />
+            <Route path={ROUTES.AGENT_ESCALATIONS} element={<EscalationPage />} />
+            <Route path={ROUTES.AGENT_ANALYTICS} element={<AnalyticsPage />} />
+            <Route path={ROUTES.AGENT_REPORTS} element={<ReportsPage />} />
+            <Route path={ROUTES.AGENT_SETTINGS} element={<SettingsPage />} />
+          </Route>
+        </Route>
+
         <Route element={<AdminRoute />}>
           <Route element={<AdminLayout />}>
             <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
             <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
             <Route path={ROUTES.AGENTS} element={<AgentsPage />} />
             <Route path={ROUTES.USERS} element={<UsersPage />} />
-            <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
+            <Route path={ROUTES.ADMIN_KNOWLEDGE} element={<KnowledgePage />} />
+            <Route path={ROUTES.ADMIN_ANALYTICS} element={<AnalyticsPage />} />
             <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />
             <Route path={ROUTES.ESCALATIONS} element={<EscalationPage />} />
-            <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
+            <Route path={ROUTES.ADMIN_REPORTS} element={<ReportsPage />} />
+            <Route path={ROUTES.ADMIN_SETTINGS} element={<SettingsPage />} />
           </Route>
         </Route>
       </Route>

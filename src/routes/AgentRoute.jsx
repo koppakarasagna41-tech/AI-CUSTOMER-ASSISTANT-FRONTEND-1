@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ROUTES, USER_ROLE } from '@/utils/constants';
 
-export default function AdminRoute() {
+export default function AgentRoute() {
     const { isAuthenticated, user, isLoading } = useAuth();
     const location = useLocation();
 
@@ -12,12 +12,12 @@ export default function AdminRoute() {
     }
 
     if (!isAuthenticated) {
-        return <Navigate to={ROUTES.ADMIN_LOGIN} state={{ from: location }} replace />;
+        return <Navigate to={ROUTES.AGENT_LOGIN} state={{ from: location }} replace />;
     }
 
-    if (user?.role !== USER_ROLE.ADMIN) {
-        if (user?.role === USER_ROLE.AGENT) {
-            return <Navigate to={ROUTES.AGENT_DASHBOARD} replace />;
+    if (user?.role !== USER_ROLE.AGENT) {
+        if (user?.role === USER_ROLE.ADMIN) {
+            return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
         }
         return <Navigate to={ROUTES.DASHBOARD} replace />;
     }

@@ -22,11 +22,15 @@ import { isValidEmail } from '@/utils/helpers';
 import { DEMO_CREDENTIALS } from '@/utils/placeholderData';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || ROUTES.HOME;
+  const isAdminLogin = location.pathname.startsWith(ROUTES.ADMIN_LOGIN);
+  const isAgentLogin = location.pathname.startsWith(ROUTES.AGENT_LOGIN);
+  const currentPortal = isAdminLogin ? USER_ROLE.ADMIN : isAgentLogin ? USER_ROLE.AGENT : USER_ROLE.CUSTOMER;
+  const portalLabel = isAdminLogin ? 'Admin portal' : isAgentLogin ? 'Agent portal' : 'Customer portal';
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -53,13 +57,41 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${user?.name?.split(' ')[0] || 'there'}!`);
 
       const role = user?.role;
-      if (role === USER_ROLE.ADMIN) {
-        navigate(ROUTES.ADMIN_DASHBOARD, { replace: true });
-      } else if (role === USER_ROLE.AGENT) {
-        navigate(ROUTES.HOME, { replace: true });
-      } else {
-        navigate(ROUTES.HOME, { replace: true });
+      const destination = (() => {
+        if (currentPortal === USER_ROLE.ADMIN) {
+          if (role === USER_ROLE.ADMIN) {
+            return from && from.startsWith(ROUTES.ADMIN) ? from : ROUTES.ADMIN_DASHBOARD;
+          }
+          return ROUTES.ADMIN_LOGIN;
+        }
+
+        if (currentPortal === USER_ROLE.AGENT) {
+          if (role === USER_ROLE.AGENT) {
+            return from && from.startsWith(ROUTES.AGENT) ? from : ROUTES.AGENT_DASHBOARD;
+          }
+          return role === USER_ROLE.ADMIN ? ROUTES.ADMIN_LOGIN : ROUTES.LOGIN;
+        }
+
+        if (role === USER_ROLE.CUSTOMER) {
+          const isSafeCustomerRedirect = from && ![ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.ADMIN_LOGIN, ROUTES.AGENT_LOGIN].includes(from);
+          return isSafeCustomerRedirect ? from : ROUTES.DASHBOARD;
+        }
+
+        return role === USER_ROLE.ADMIN ? ROUTES.ADMIN_LOGIN : ROUTES.AGENT_LOGIN;
+      })();
+
+      if (currentPortal === USER_ROLE.ADMIN && role !== USER_ROLE.ADMIN) {
+        await logout();
+        toast.error('Only admin accounts may sign in through this portal.');
+      } else if (currentPortal === USER_ROLE.AGENT && role !== USER_ROLE.AGENT) {
+        await logout();
+        toast.error('Only agent accounts may sign in through this portal.');
+      } else if (currentPortal === USER_ROLE.CUSTOMER && role !== USER_ROLE.CUSTOMER) {
+        await logout();
+        toast.error(`Please sign in through the ${role === USER_ROLE.ADMIN ? 'Admin' : 'Agent'} portal.`);
       }
+
+      navigate(destination, { replace: true });
     } catch (err) {
       toast.error(err.message || 'Login failed. Please try again.');
     } finally {
@@ -76,7 +108,7 @@ export default function LoginPage() {
     <div className="space-y-6">
       {/* Heading */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign in</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign in to the {portalLabel}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Don't have an account?{' '}
           <Link to={ROUTES.REGISTER}

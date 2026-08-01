@@ -12,7 +12,10 @@ export const APP_VERSION = '1.0.0';
 // ── Route paths ───────────────────────────────────────────────
 export const ROUTES = {
   HOME: '/',
+  DASHBOARD: '/dashboard',
   LOGIN: '/login',
+  AGENT_LOGIN: '/agent/login',
+  ADMIN_LOGIN: '/admin/login',
   REGISTER: '/register',
   CHAT: '/chat',
   HISTORY: '/history',
@@ -29,6 +32,19 @@ export const ROUTES = {
   AGENTS: '/admin/agents',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN: '/admin',
+  AGENT_DASHBOARD: '/agent/dashboard',
+  AGENT_TICKETS: '/agent/tickets',
+  AGENT_ASSIGNED_TICKETS: '/agent/assigned-tickets',
+  AGENT_HISTORY: '/agent/history',
+  AGENT_KNOWLEDGE: '/agent/knowledge',
+  AGENT_ESCALATIONS: '/agent/escalations',
+  AGENT_ANALYTICS: '/agent/analytics',
+  AGENT_REPORTS: '/agent/reports',
+  AGENT_SETTINGS: '/agent/settings',
+  ADMIN_KNOWLEDGE: '/admin/knowledge',
+  ADMIN_ANALYTICS: '/admin/analytics',
+  ADMIN_REPORTS: '/admin/reports',
+  ADMIN_SETTINGS: '/admin/settings',
   NOT_FOUND: '*',
 };
 
