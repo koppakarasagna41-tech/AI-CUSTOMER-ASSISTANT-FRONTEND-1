@@ -22,6 +22,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // ── Layouts ──────────────────────────────────────────────────
 import MainLayout from '@/layouts/MainLayout';
+import AdminLayout from '@/layouts/AdminLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 
 // ── Route guards ─────────────────────────────────────────────
@@ -45,6 +46,7 @@ import CustomersPage from '@/pages/CustomersPage';
 import UsersPage from '@/pages/UsersPage';
 import EscalationPage from '@/pages/EscalationPage';
 import ReportsPage from '@/pages/ReportsPage';
+import AdminDashboardPage from '@/pages/AdminDashboardPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 // ── Constants ─────────────────────────────────────────────────
@@ -74,12 +76,17 @@ export default function AppRoutes() {
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.AI_SUGGESTIONS} element={<AISuggestionsPage />} />
           <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />
-          <Route element={<AdminRoute />}>
-            <Route path={ROUTES.USERS} element={<UsersPage />} />
-          </Route>
           <Route path={ROUTES.ESCALATIONS} element={<EscalationPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+        </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+            <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+            <Route path={ROUTES.USERS} element={<UsersPage />} />
+          </Route>
         </Route>
       </Route>
 

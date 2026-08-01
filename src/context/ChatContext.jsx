@@ -22,7 +22,6 @@ import {
 import { generateId } from '@/utils/helpers';
 import chatService from '@/services/chatService';
 import historyService from '@/services/historyService';
-import { queryRag } from '@/services/ragService';
 
 function generateConversationTitle(text = '') {
   return text
@@ -32,6 +31,10 @@ function generateConversationTitle(text = '') {
     .slice(0, 6)
     .join(' ')
     .replace(/[^\w\s\-'.?]/g, '') || 'New conversation';
+}
+
+function isPersistedConversationId(id) {
+  return typeof id === 'string' && /^(CONV-|RAG-)/.test(id);
 }
 
 // ── State shape ──────────────────────────────────────────────
@@ -140,19 +143,22 @@ export function ChatProvider({ children, initialConversationId = null }) {
       let payload;
       let conversationId;
 
-      if (state.conversationId && state.conversationId.startsWith('conv_')) {
-        response = await queryRag({
-          question: cleanedContent,
-          conversation_id: state.conversationId,
-          top_k: 5,
+      const shouldContinueConversation = isPersistedConversationId(state.conversationId);
+
+      if (shouldContinueConversation) {
+        response = await chatService.sendMessage({
+          conversationId: state.conversationId,
+          content: cleanedContent,
         });
-        payload = response?.data ?? response;
-        conversationId = payload?.conversation_id;
       } else {
-        response = await queryRag({ question: cleanedContent, top_k: 5 });
-        payload = response?.data ?? response;
-        conversationId = payload?.conversation_id;
+        response = await chatService.startChat({
+          message: cleanedContent,
+          title: generateConversationTitle(cleanedContent),
+        });
       }
+
+      payload = response?.data ?? response;
+      conversationId = payload?.conversation_id || state.conversationId;
 
       if (conversationId) {
         dispatch({ type: 'SET_CONVERSATION_ID', payload: conversationId });
@@ -164,10 +170,10 @@ export function ChatProvider({ children, initialConversationId = null }) {
       const aiMessage = {
         id: generateId(),
         role: 'assistant',
-        content: payload?.answer || payload?.message || 'I could not respond right now.',
+        content: payload?.ai_response?.content || payload?.answer || payload?.message || 'I could not respond right now.',
         sources: payload?.sources || [],
         confidence: payload?.confidence ?? payload?.confidence_score ?? payload?.confidenceLevel ?? null,
-        provider: payload?.provider || payload?.model || payload?.model_used || payload?.ai_provider || null,
+        provider: payload?.provider || payload?.model || payload?.model_used || payload?.ai_provider || payload?.ai_response?.model_used || null,
         suggestedQuestions: payload?.suggested_questions || payload?.follow_up_questions || [],
         timestamp: new Date().toISOString(),
         status: 'delivered',

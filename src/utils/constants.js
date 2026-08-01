@@ -26,6 +26,8 @@ export const ROUTES = {
   ESCALATIONS: '/escalations',
   REPORTS: '/reports',
   SETTINGS: '/settings',
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN: '/admin',
   NOT_FOUND: '*',
 };
 

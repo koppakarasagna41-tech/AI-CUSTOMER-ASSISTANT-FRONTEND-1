@@ -17,7 +17,7 @@ import { useToast } from '@/context/ToastContext';
 import authService from '@/services/authService';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, USER_ROLE } from '@/utils/constants';
 import { isValidEmail } from '@/utils/helpers';
 import { DEMO_CREDENTIALS } from '@/utils/placeholderData';
 
@@ -51,7 +51,15 @@ export default function LoginPage() {
       const { user, token, refreshToken } = await authService.login(form);
       login(user, token, refreshToken);
       toast.success(`Welcome back, ${user?.name?.split(' ')[0] || 'there'}!`);
-      navigate(from, { replace: true });
+
+      const role = user?.role;
+      if (role === USER_ROLE.ADMIN) {
+        navigate(ROUTES.ADMIN_DASHBOARD, { replace: true });
+      } else if (role === USER_ROLE.AGENT) {
+        navigate(ROUTES.HOME, { replace: true });
+      } else {
+        navigate(ROUTES.HOME, { replace: true });
+      }
     } catch (err) {
       toast.error(err.message || 'Login failed. Please try again.');
     } finally {
