@@ -15,9 +15,32 @@ export async function listUsers(params = {}) {
     }
 }
 
+export async function listAgents(params = {}) {
+    try {
+        const response = await api.get('/admin/agents', { params });
+        return {
+            items: response?.data ?? [],
+            total: response?.meta?.total_items ?? 0,
+            page: response?.meta?.page ?? params.page ?? 1,
+            pageSize: response?.meta?.page_size ?? params.page_size ?? 10,
+        };
+    } catch (error) {
+        normalizeApiError(error);
+    }
+}
+
 export async function getUser(userId) {
     try {
         const response = await api.get(`/users/${userId}`);
+        return response?.data ?? response;
+    } catch (error) {
+        normalizeApiError(error);
+    }
+}
+
+export async function getAgent(agentId) {
+    try {
+        const response = await api.get(`/admin/agents/${agentId}`);
         return response?.data ?? response;
     } catch (error) {
         normalizeApiError(error);
@@ -59,6 +82,18 @@ export async function resetPassword(userId, password) {
     }
 }
 
+export async function updateAgent(agentId, payload = {}) {
+    try {
+        const response = await api.patch(`/admin/agents/${agentId}`, {
+            full_name: payload.fullName,
+            is_active: payload.isActive,
+        });
+        return response?.data ?? response;
+    } catch (error) {
+        normalizeApiError(error);
+    }
+}
+
 export async function deleteUser(userId) {
     try {
         const response = await api.delete(`/users/${userId}`);
@@ -68,6 +103,24 @@ export async function deleteUser(userId) {
     }
 }
 
-const usersService = { listUsers, getUser, createAgent, updateUser, resetPassword, deleteUser };
+export async function deleteAgent(agentId) {
+    try {
+        const response = await api.delete(`/admin/agents/${agentId}`);
+        return response?.data ?? response;
+    } catch (error) {
+        normalizeApiError(error);
+    }
+}
+
+export async function resetAgentPassword(agentId, password) {
+    try {
+        const response = await api.post(`/admin/agents/${agentId}/reset-password`, { password });
+        return response?.data ?? response;
+    } catch (error) {
+        normalizeApiError(error);
+    }
+}
+
+const usersService = { listUsers, listAgents, getUser, getAgent, createAgent, updateUser, updateAgent, resetPassword, resetAgentPassword, deleteUser, deleteAgent };
 
 export default usersService;

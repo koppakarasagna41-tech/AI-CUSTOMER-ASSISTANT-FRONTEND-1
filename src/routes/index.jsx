@@ -44,6 +44,7 @@ import KnowledgePage from '@/pages/KnowledgePage';
 import AISuggestionsPage from '@/pages/AISuggestionsPage';
 import CustomersPage from '@/pages/CustomersPage';
 import UsersPage from '@/pages/UsersPage';
+import AgentsPage from '@/pages/AgentsPage';
 import EscalationPage from '@/pages/EscalationPage';
 import ReportsPage from '@/pages/ReportsPage';
 import AdminDashboardPage from '@/pages/AdminDashboardPage';
@@ -81,6 +82,7 @@ export default function AppRoutes() {
           <Route element={<AdminLayout />}>
             <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
             <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+            <Route path={ROUTES.AGENTS} element={<AgentsPage />} />
             <Route path={ROUTES.USERS} element={<UsersPage />} />
             <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
             <Route path={ROUTES.CUSTOMERS} element={<CustomersPage />} />

@@ -8,6 +8,7 @@ import {
     HiCog6Tooth,
     HiSparkles,
     HiUsers,
+    HiUserGroup,
     HiExclamationTriangle,
     HiArrowRightOnRectangle,
 } from 'react-icons/hi2';
@@ -31,6 +32,7 @@ export function getNavigationItems(role) {
     if (role === USER_ROLE.ADMIN) {
         return [
             { to: ROUTES.ADMIN_DASHBOARD, label: 'Admin Dashboard', icon: HiHome },
+            { to: ROUTES.AGENTS, label: 'Agents', icon: HiUserGroup },
             { to: ROUTES.USERS, label: 'Manage Users', icon: HiUsers },
             { to: ROUTES.ANALYTICS, label: 'Analytics', icon: HiChartBarSquare },
             { to: ROUTES.CUSTOMERS, label: 'Customers', icon: HiUsers },

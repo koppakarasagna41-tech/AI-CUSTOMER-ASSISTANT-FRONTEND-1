@@ -24,7 +24,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const adminCards = [
-    { to: ROUTES.USERS, label: 'Manage Users', description: 'Create and review customer and agent accounts.', icon: HiUsers, color: 'blue' },
+    { to: ROUTES.AGENTS, label: 'Agents', description: 'Manage agent onboarding, status, and passwords.', icon: HiUserGroup, color: 'purple' },
     { to: ROUTES.KNOWLEDGE, label: 'Knowledge Base', description: 'Publish and maintain support content.', icon: HiBookOpen, color: 'green' },
     { to: ROUTES.ANALYTICS, label: 'Analytics', description: 'Review product and support trends.', icon: HiChartBarSquare, color: 'purple' },
     { to: ROUTES.REPORTS, label: 'Reports', description: 'Inspect operational and compliance reporting.', icon: HiClipboardDocumentList, color: 'amber' },
