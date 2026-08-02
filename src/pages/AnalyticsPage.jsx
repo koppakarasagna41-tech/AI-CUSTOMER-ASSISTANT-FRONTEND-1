@@ -121,17 +121,17 @@ export default function AnalyticsPage() {
 
     async function loadAnalytics() {
       try {
-        const [overviewResponse, chartResponse, issuesResponse] = await Promise.all([
+        const [overviewResponse, chartResponse, issueResponse] = await Promise.all([
           analyticsService.getMetrics(period),
-          analyticsService.getChartData(period),
-          analyticsService.getTopIssues(period),
+          analyticsService.getDailyChart({ days: 30 }),
+          analyticsService.getIntentChart(period),
         ]);
         const overview = overviewResponse?.data ?? overviewResponse;
         const chart = chartResponse?.data ?? chartResponse;
-        const issues = issuesResponse?.data ?? issuesResponse;
+        const issues = issueResponse?.data ?? issueResponse;
         setMetrics(overview);
-        setDailyChart(chart?.data ?? []);
-        setTopIssues(issues?.data ?? []);
+        setDailyChart(chart?.data ?? chart ?? []);
+        setTopIssues(issues?.data ?? issues ?? []);
       } catch (err) {
         toast.error(err.message || 'Unable to load analytics.');
       } finally {
