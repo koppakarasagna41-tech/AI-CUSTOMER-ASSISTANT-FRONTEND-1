@@ -35,7 +35,7 @@ function authReducer(state, action) {
         token: action.payload.token,
         isAdmin: action.payload.user?.role === USER_ROLE.ADMIN,
         isAuthenticated: !!action.payload.token,
-        isLoading: false,
+        isLoading: !!action.payload.token,
       };
 
     case 'LOGIN':

@@ -13,7 +13,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ROUTES } from '@/utils/constants';
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   function getLoginRoute(pathname) {
@@ -22,12 +22,10 @@ export default function ProtectedRoute() {
     return ROUTES.LOGIN;
   }
 
-  // Still hydrating auth state — show full-page spinner
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && !user)) {
     return <LoadingSpinner fullPage />;
   }
 
-  // Not authenticated — bounce to portal-specific login, remember where they were going
   if (!isAuthenticated) {
     return (
       <Navigate

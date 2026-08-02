@@ -32,6 +32,7 @@ export const ROUTES = {
   AGENTS: '/admin/agents',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN: '/admin',
+  AGENT: '/agent',
   AGENT_DASHBOARD: '/agent/dashboard',
   AGENT_TICKETS: '/agent/tickets',
   AGENT_ASSIGNED_TICKETS: '/agent/assigned-tickets',

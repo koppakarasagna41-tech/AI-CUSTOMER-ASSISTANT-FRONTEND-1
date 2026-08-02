@@ -15,7 +15,7 @@ export default function PublicRoute() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && !user)) {
     return <LoadingSpinner fullPage />;
   }
 
