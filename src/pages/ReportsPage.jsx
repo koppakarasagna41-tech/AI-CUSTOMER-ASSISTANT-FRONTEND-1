@@ -11,7 +11,7 @@ import reportsService from '@/services/reportsService';
 const DEFAULT_PERIOD = 'last_30_days';
 
 export default function ReportsPage() {
-    const { isAdmin } = useAuth();
+    const { isAdmin, user } = useAuth();
     const { toast } = useToast();
     const [period, setPeriod] = useState(DEFAULT_PERIOD);
     const [format, setFormat] = useState('pdf');
@@ -56,11 +56,12 @@ export default function ReportsPage() {
         }
     }
 
-    if (!isAdmin) {
+    const isAllowed = isAdmin || user?.role === 'agent';
+    if (!isAllowed) {
         return (
             <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
                 <div className="card p-6 text-sm text-gray-600 dark:text-gray-300">
-                    Reports are available to administrators only.
+                    Reports are available to administrators and agents only.
                 </div>
             </div>
         );

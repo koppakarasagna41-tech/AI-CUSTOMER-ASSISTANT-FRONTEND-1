@@ -107,7 +107,7 @@ export default function HomePage() {
         if (staffMode) {
           const [overviewResponse, dailyResponse, ticketStatsResponse, conversationsResponse] = await Promise.all([
             analyticsService.getMetrics('last_30_days'),
-            analyticsService.getDailyChart({ days: 14 }),
+            isAdmin ? analyticsService.getDailyChart({ days: 14 }) : Promise.resolve([]),
             ticketService.getTicketStats(),
             chatService.getConversations({ page_size: 4 }),
           ]);
@@ -115,7 +115,7 @@ export default function HomePage() {
           if (!mounted) return;
 
           setMetrics(overviewResponse?.data ?? overviewResponse);
-          setDailyChart((dailyResponse?.data ?? dailyResponse)?.data ?? dailyResponse?.data ?? dailyResponse ?? []);
+          setDailyChart(isAdmin ? ((dailyResponse?.data ?? dailyResponse)?.data ?? dailyResponse?.data ?? dailyResponse ?? []) : []);
           setTicketStats(ticketStatsResponse?.data ?? ticketStatsResponse);
           setConversations((conversationsResponse?.data ?? []).map((conversation) => ({
             id: conversation.id || conversation.conversation_id,
@@ -280,13 +280,15 @@ export default function HomePage() {
         </motion.div>
 
         <div className="grid gap-4 xl:grid-cols-3">
-          <motion.section {...fadeUp(0.1)} className="card p-5 xl:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Daily Tickets</h2>
-              <span className="text-xs text-gray-500 dark:text-gray-400">Last 14 days</span>
-            </div>
-            <MiniBarChart data={dailyChart} />
-          </motion.section>
+          {isAdmin ? (
+            <motion.section {...fadeUp(0.1)} className="card p-5 xl:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Daily Tickets</h2>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Last 14 days</span>
+              </div>
+              <MiniBarChart data={dailyChart} />
+            </motion.section>
+          ) : null}
 
           <motion.section {...fadeUp(0.15)} className="card p-5 space-y-4">
             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Top Metrics</h2>

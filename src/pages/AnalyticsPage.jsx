@@ -103,7 +103,7 @@ function SatisfactionRing({ score }) {
 
 export default function AnalyticsPage() {
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const [period, setPeriod] = useState('last_30_days');
   const [metrics, setMetrics] = useState(null);
@@ -112,8 +112,9 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAdmin) {
-      toast.info('Analytics is only available to administrators. Redirecting to home.');
+    const isAllowed = isAdmin || user?.role === 'agent';
+    if (!isAllowed) {
+      toast.info('Analytics is only available to administrators and agents. Redirecting to home.');
       navigate(ROUTES.HOME, { replace: true });
       return;
     }
@@ -139,7 +140,7 @@ export default function AnalyticsPage() {
     }
 
     loadAnalytics();
-  }, [period, toast, isAdmin, navigate]);
+  }, [period, toast, isAdmin, user?.role, navigate]);
 
   const KPI_CARDS = useMemo(() => [
     {

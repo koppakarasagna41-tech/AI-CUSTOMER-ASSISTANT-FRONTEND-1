@@ -112,10 +112,7 @@ api.interceptors.response.use(
       );
 
     if (status === 403) {
-      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-        window.location.replace('/');
-      }
-      return Promise.reject({ status, message: 'You are not authorized to access this resource.', raw: error });
+      return Promise.reject({ status, message, raw: error });
     }
 
     if (status === 401 && !originalRequest?._retry && !originalRequest?.url?.includes('/auth/login') && !originalRequest?.url?.includes('/auth/refresh')) {
