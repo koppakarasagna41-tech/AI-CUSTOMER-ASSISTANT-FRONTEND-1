@@ -7,7 +7,7 @@ export default function AdminRoute() {
     const { isAuthenticated, user, isLoading } = useAuth();
     const location = useLocation();
 
-    if (isLoading) {
+    if (isLoading || (isAuthenticated && !user)) {
         return <LoadingSpinner fullPage />;
     }
 
