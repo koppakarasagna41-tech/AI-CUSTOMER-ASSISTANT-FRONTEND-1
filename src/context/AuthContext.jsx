@@ -151,6 +151,9 @@ export function AuthProvider({ children }) {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER);
       dispatch({ type: 'LOGOUT' });
     }
   }, []);

@@ -57,38 +57,62 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${user?.name?.split(' ')[0] || 'there'}!`);
 
       const role = user?.role;
-      const destination = (() => {
-        if (currentPortal === USER_ROLE.ADMIN) {
-          if (role === USER_ROLE.ADMIN) {
-            return from && from.startsWith(ROUTES.ADMIN) ? from : ROUTES.ADMIN_DASHBOARD;
-          }
-          return ROUTES.ADMIN_LOGIN;
+      const isSafeRedirect = (path, roleToCheck) => {
+        if (!path) return false;
+        if ([ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.ADMIN_LOGIN, ROUTES.AGENT_LOGIN].includes(path)) {
+          return false;
         }
 
-        if (currentPortal === USER_ROLE.AGENT) {
-          if (role === USER_ROLE.AGENT) {
-            return from && from.startsWith(ROUTES.AGENT) ? from : ROUTES.AGENT_DASHBOARD;
-          }
-          return role === USER_ROLE.ADMIN ? ROUTES.ADMIN_LOGIN : ROUTES.LOGIN;
+        if (roleToCheck === USER_ROLE.ADMIN) {
+          return path.startsWith(ROUTES.ADMIN);
+        }
+
+        if (roleToCheck === USER_ROLE.AGENT) {
+          return path.startsWith(ROUTES.AGENT);
+        }
+
+        return !path.startsWith(ROUTES.ADMIN) && !path.startsWith(ROUTES.AGENT);
+      };
+
+      const destination = (() => {
+        if (role === USER_ROLE.ADMIN) {
+          return isSafeRedirect(from, USER_ROLE.ADMIN) ? from : ROUTES.ADMIN_DASHBOARD;
+        }
+
+        if (role === USER_ROLE.AGENT) {
+          return isSafeRedirect(from, USER_ROLE.AGENT) ? from : ROUTES.AGENT_DASHBOARD;
         }
 
         if (role === USER_ROLE.CUSTOMER) {
-          const isSafeCustomerRedirect = from && ![ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.ADMIN_LOGIN, ROUTES.AGENT_LOGIN].includes(from);
-          return isSafeCustomerRedirect ? from : ROUTES.DASHBOARD;
+          return isSafeRedirect(from, USER_ROLE.CUSTOMER) ? from : ROUTES.DASHBOARD;
         }
 
-        return role === USER_ROLE.ADMIN ? ROUTES.ADMIN_LOGIN : ROUTES.AGENT_LOGIN;
+        return ROUTES.LOGIN;
       })();
 
-      if (currentPortal === USER_ROLE.ADMIN && role !== USER_ROLE.ADMIN) {
+      const isPortalMatch =
+        (currentPortal === USER_ROLE.ADMIN && role === USER_ROLE.ADMIN) ||
+        (currentPortal === USER_ROLE.AGENT && role === USER_ROLE.AGENT) ||
+        (currentPortal === USER_ROLE.CUSTOMER && role === USER_ROLE.CUSTOMER);
+
+      if (!isPortalMatch) {
         await logout();
-        toast.error('Only admin accounts may sign in through this portal.');
-      } else if (currentPortal === USER_ROLE.AGENT && role !== USER_ROLE.AGENT) {
-        await logout();
-        toast.error('Only agent accounts may sign in through this portal.');
-      } else if (currentPortal === USER_ROLE.CUSTOMER && role !== USER_ROLE.CUSTOMER) {
-        await logout();
-        toast.error(`Please sign in through the ${role === USER_ROLE.ADMIN ? 'Admin' : 'Agent'} portal.`);
+
+        if (role === USER_ROLE.ADMIN) {
+          toast.error('Only admin accounts may sign in through this portal.');
+          navigate(ROUTES.ADMIN_LOGIN, { replace: true });
+        } else if (role === USER_ROLE.AGENT) {
+          toast.error('Only agent accounts may sign in through this portal.');
+          navigate(ROUTES.AGENT_LOGIN, { replace: true });
+        } else if (role === USER_ROLE.CUSTOMER) {
+          toast.error('Please sign in through the customer portal.');
+          navigate(ROUTES.LOGIN, { replace: true });
+        } else {
+          toast.error('Your account does not match this login portal.');
+          navigate(ROUTES.LOGIN, { replace: true });
+        }
+
+        return;
       }
 
       navigate(destination, { replace: true });

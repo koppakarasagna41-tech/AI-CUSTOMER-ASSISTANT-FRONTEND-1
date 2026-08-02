@@ -63,10 +63,15 @@ export default function Sidebar() {
       ? 'Agent Workspace'
       : 'Customer Assistant';
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     toast.success('You have been signed out.');
-    navigate(ROUTES.LOGIN);
+    const destination = user?.role === USER_ROLE.ADMIN
+      ? ROUTES.ADMIN_LOGIN
+      : user?.role === USER_ROLE.AGENT
+        ? ROUTES.AGENT_LOGIN
+        : ROUTES.LOGIN;
+    navigate(destination, { replace: true });
   }
 
   return (

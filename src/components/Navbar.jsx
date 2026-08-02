@@ -39,10 +39,15 @@ export default function Navbar({ onMenuClick }) {
   const dropRef = useClickOutside(() => setDropOpen(false));
   const notifRef = useClickOutside(() => setNotifOpen(false));
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     toast.success('You have been signed out.');
-    navigate(ROUTES.LOGIN);
+    const destination = user?.role === USER_ROLE.ADMIN
+      ? ROUTES.ADMIN_LOGIN
+      : user?.role === USER_ROLE.AGENT
+        ? ROUTES.AGENT_LOGIN
+        : ROUTES.LOGIN;
+    navigate(destination, { replace: true });
   }
 
   return (

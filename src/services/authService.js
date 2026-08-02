@@ -68,6 +68,9 @@ export async function logout() {
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER);
   }
   return { success: true };
 }
