@@ -41,7 +41,7 @@ The frontend communicates with the backend APIs to provide features such as auth
 - FastAPI
 
 ### Database
-- PostgreSQL (Supabase)
+- Mongodb
 
 ### Deployment
 - Vercel (Frontend)
