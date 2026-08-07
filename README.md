@@ -95,7 +95,7 @@ Frontend is deployed using **Vercel**.
 
 Backend APIs are deployed using **Render**.
 
-Database is hosted on **Supabase PostgreSQL**.
+Database is hosted on **Mongodb atlas**.
 
 ---
 
