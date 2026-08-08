@@ -163,7 +163,7 @@ export default function UsersPage() {
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Agent Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User And Agent</h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Administrators can create, edit, and manage agent accounts while preserving customer self-registration.</p>
                 </div>
                 <Button variant="primary" leftIcon={<HiPlus className="h-4 w-4" />} onClick={() => { setEditingUser(null); setForm(initialForm); setErrors({}); setIsModalOpen(true); }}>
